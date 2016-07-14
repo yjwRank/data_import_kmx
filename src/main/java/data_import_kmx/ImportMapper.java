@@ -89,7 +89,7 @@ public class ImportMapper extends Mapper<Object,Text,Text,LList>{
 	      StringTokenizer itr = new StringTokenizer(line,",");
 	      String token;
 	      
-	     while(line.charAt(0)!='W')
+	/*     while(line.charAt(0)!='W')
 	     {
 	    	 que.add(line);
 	     }
@@ -123,9 +123,9 @@ public class ImportMapper extends Mapper<Object,Text,Text,LList>{
 				  title.add(t.get(Key).get(item[i]));
 			  }
 			  System.out.println(title.get(i));
-		  }
+		  }*/
 	      
-	     /* if(line.charAt(0)=='W')
+	      if(line.charAt(0)=='W')
 	      {
 	    	  System.out.println(line);
 	    	  item=line.split(",");
@@ -176,7 +176,7 @@ public class ImportMapper extends Mapper<Object,Text,Text,LList>{
 	    	  }
 	    	
 	      }
-	      */
+	      
 	      
 	    }
 }
