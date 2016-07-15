@@ -132,25 +132,51 @@ public class data_import_kmx {
     }
 	public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException, SQLException
 	{
-		System.out.println("main");
+		/*System.out.println("main");
 		data_import_kmx test=new data_import_kmx();
 		test.run();
-		
+		*/
 		/***
 		 *  Map => Reduce finished Map Reduce 
 		 */
 		
-		/*GZip test=new GZip("/home/yjw/Desktop/test.tar.gz");
+	/*	GZip test=new GZip("/home/yjw/Desktop/output1/GW150001201504.tar.gz");
 		
-	String t=test.unTargzFile("/home/yjw/Desktop/test.tar.gz", "/home/yjw/Desktop");
+	String t=test.unTargzFile("/home/yjw/Desktop/output1/GW150001201504.tar.gz", "/home/yjw/Desktop/output1");
 		//String t="/home/yjw/Desktop/output1/GW150001201504";
-		System.out.println("o:"+t);*/
-	//	GoldwindToCSV test2=new GoldwindToCSV();
-	//	test2.TraversFolder(t);
+		System.out.println("o:"+t);
+		GoldwindToCSV test2=new GoldwindToCSV();
+		test2.TraversFolder(t);
 		
-	//	test2.ZipToDB(t);
+		test2.ZipToDB(t);*/
 	//	test2.DbToCSV(t);
-		
+		String filename="/home/yjw/Desktop/output1/GW150001201504/GW15000120150424.db";
+        String outputFile="/home/yjw/Desktop/output1/GW150001201504/GW15000120150424.db.csv";
+        System.out.println("outputFile:"+outputFile);
+        BufferedWriter bw = new BufferedWriter(new FileWriter(outputFile));
+        Connection conn = DriverManager.getConnection("jdbc:sqlite:"+filename);
+		Statement stmt = conn.createStatement();
+		ResultSet rs = stmt.executeQuery("select * from RUNDATA");
+		ResultSetMetaData rsmd=rs.getMetaData();
+		String name=null;
+		int colNum = rs.getMetaData().getColumnCount();
+		for(int i=1;i<=colNum;i++)
+		{
+			//System.out.println(rsmd.getColumnName(i));
+			name=rsmd.getColumnName(i);
+			bw.write(name+",");
+		}
+		bw.write(rs.getString(colNum)+"\n");
+		System.out.println("colNum:"+colNum);
+		while(rs.next()) {
+			for(int i = 1; i < colNum; i++) {
+				bw.write(rs.getString(i) + ",");
+			}
+			bw.write(rs.getString(colNum) + "\n");
+		}
+		conn.close();
+		bw.flush();
+		bw.close();
 	
 	}
 	
