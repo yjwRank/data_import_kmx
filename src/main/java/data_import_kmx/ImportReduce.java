@@ -59,11 +59,11 @@ public class ImportReduce extends Reducer<Text,LList,NullWritable,Text>{
     	Vector<String> vec=new Vector<String>();
     	if(token1.length!=tit.size())
     	{
-    		System.out.println("error "+token1.length+" "+tit.size());
+    		System.out.println("error "+token1.length+" "+tit.size()+"  name:"+tit.getname());
     	}
     	else
     	{
-    		System.out.println("right:"+token1.length);
+    		System.out.println("right:"+token1.length+" name:"+tit.getname());
     		
     		for(int i=0;i<token1.length;i++)
     			vec.add("0");
@@ -81,7 +81,8 @@ public class ImportReduce extends Reducer<Text,LList,NullWritable,Text>{
     			buffer+=vec.get(i);
     		}
     	}
-    	mos.write(NullWritable.get(), new Text(buffer), "/home/yjw/Desktop/output/test.csv");	
+  //  	mos.write(NullWritable.get(), new Text(buffer), "/home/yjw/Desktop/output/test.csv");	
+    	mos.write(NullWritable.get(), new Text(buffer), tit.getname());
     }
    
     }

@@ -83,8 +83,11 @@ public class ImportJob {
 		System.out.println("importJob-run");
 		deleteDir(new File("/home/yjw/Desktop/output"));
 		Job job=Job.getInstance(conf,"import data kmx");
-		FileInputFormat.addInputPath(job, new Path("/home/yjw/Desktop/input/mrtest.csv"));
+		FileInputFormat.addInputPath(job, new Path("/home/yjw/Desktop/test.tar.gz"));
+		//FileInputFormat.addInputPath(job, new Path("/home/yjw/Desktop/input/mrtest.csv"));
 		FileOutputFormat.setOutputPath(job, new Path("/home/yjw/Desktop/output"));
+		
+		
 		System.exit(job.waitForCompletion(true)?0:1);
 		return false;
 	}
@@ -98,8 +101,7 @@ public class ImportJob {
 	{
 		conf.set(MRJobConfig.JOB_NAME, "ImportDataToKMX");
 		conf.set(MRJobConfig.MAP_CLASS_ATTR,ImportMapper.class.getName());
-		
-		
+		conf.set(MRJobConfig.INPUT_FORMAT_CLASS_ATTR, ImportInputFormat.class.getName());
 		conf.set(MRJobConfig.MAP_OUTPUT_KEY_CLASS,Text.class.getName());
 		//conf.set(MRJobConfig.MAP_OUTPUT_VALUE_CLASS, Text.class.getName());
 		

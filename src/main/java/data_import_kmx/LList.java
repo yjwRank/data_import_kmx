@@ -10,9 +10,11 @@ import org.apache.hadoop.io.Writable;
 
 public class LList implements Writable{
 	private List title;
+	private String name;
 	public LList()
 	{
 		title=new LinkedList();
+		name=null;
 	}
 	
 	public void add(int num)
@@ -20,6 +22,14 @@ public class LList implements Writable{
 		title.add(num);
 	}
 	
+	public String getname()
+	{
+		return name;
+	}
+	public void setName(String name)
+	{
+		this.name=name;
+	}
 	public void clear()
 	{
 		title.clear();
@@ -43,6 +53,7 @@ public class LList implements Writable{
 		{
 			title.add(in.readInt());
 		}
+		this.name=in.readUTF();
 	}
 	
 	public void write(DataOutput out) throws IOException
@@ -54,5 +65,6 @@ public class LList implements Writable{
 			out.writeInt((Integer) title.get(i));
 			
 		}
+		out.writeUTF(this.name);
 	}
 }

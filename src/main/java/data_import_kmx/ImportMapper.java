@@ -88,6 +88,7 @@ public class ImportMapper extends Mapper<Object,Text,Text,LList>{
 	      String line=value.toString();
 	      StringTokenizer itr = new StringTokenizer(line,",");
 	      String token;
+	      System.out.println("map-key:"+key+" map-value:"+value);
 	      
 	/*     while(line.charAt(0)!='W')
 	     {
@@ -168,10 +169,12 @@ public class ImportMapper extends Mapper<Object,Text,Text,LList>{
 	    		  }
 	    		  
 	    		  toReduce=true;
+	    		  title.setName(key.toString());
 	    		  context.write(new Text(line), title);
 	    	  }
 	    	  else
 	    	  {
+	    		  title.setName(key.toString());
 	    		  context.write(new Text(line), title);;
 	    	  }
 	    	
