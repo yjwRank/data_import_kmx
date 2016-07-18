@@ -48,6 +48,31 @@ public class ImportReduce extends Reducer<Text,LList,NullWritable,Text>{
     {
     	mos.close();
     }
+    
+    public String converToISOTime(String tuibineID) throws ParseException
+	  {
+		  DateFormat turbineID_format=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		  Date turbineID_date=turbineID_format.parse(tuibineID);
+		  TimeZone tz=TimeZone.getTimeZone("UTC");
+		  DateFormat df=new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+		  df.setTimeZone(tz);
+		  turbineID_format.setLenient(false);
+		  String ISOTime=df.format(turbineID_date);
+		  
+		  Date now=new Date();
+		  if(turbineID_date.after(now))
+			  return null;
+		  
+		  
+		  try{
+			  turbineID_format.parse(tuibineID);
+			  return ISOTime;
+		  }catch(Exception e)
+		  {
+			  return null;
+		  }
+		  //return ISOTime;
+	  }
     public void reduce(Text key,Iterable<LList> title,Context context
             ) throws IOException, InterruptedException {
     
@@ -75,6 +100,16 @@ public class ImportReduce extends Reducer<Text,LList,NullWritable,Text>{
     	if(vec.size()>0)
     	{
     		buffer+=vec.get(0);
+    		buffer+=',';
+    		try {
+				String tmp=converToISOTime(vec.get(1));
+				if(tmp==null)
+					return;
+				buffer+=tmp;
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
     		for(int i=1;i<vec.size();i++)
     		{
     			buffer+=",";

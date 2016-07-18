@@ -28,10 +28,16 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 public class ImportJob {
 	
 	private Configuration conf;
-	public ImportJob()
+	private Job job;
+	private String inputPath=null;
+	private String outputPath=null;
+	public ImportJob(String input,String output) throws IOException
 	{
 		System.out.println("importjob-importjob");
 		conf=new Configuration();
+		//job=Job.getInstance(conf,"import-data-kmx");
+		inputPath=input;
+		outputPath=output;
 		setMRJobConf();
 	}
 	
@@ -82,11 +88,12 @@ public class ImportJob {
 	{
 		System.out.println("importJob-run");
 		deleteDir(new File("/home/yjw/Desktop/output"));
-		Job job=Job.getInstance(conf,"import data kmx");
-		FileInputFormat.addInputPath(job, new Path("/home/yjw/Desktop/test.tar.gz"));
+		 job=Job.getInstance(conf,"import data kmx");
+	//	FileInputFormat.addInputPath(job, new Path("/home/yjw/Desktop/test.tar.gz"));
 		//FileInputFormat.addInputPath(job, new Path("/home/yjw/Desktop/input/mrtest.csv"));
-		FileOutputFormat.setOutputPath(job, new Path("/home/yjw/Desktop/output"));
-		
+	//	FileOutputFormat.setOutputPath(job, new Path("/home/yjw/Desktop/output"));
+		 FileInputFormat.addInputPath(job, new Path(inputPath));
+		 FileOutputFormat.setOutputPath(job, new Path(outputPath));
 		
 		System.exit(job.waitForCompletion(true)?0:1);
 		return false;

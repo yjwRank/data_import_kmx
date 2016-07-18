@@ -42,13 +42,15 @@ public class ImportRecordReader extends RecordReader<Text, Text>{
 	public void initialize(InputSplit split, TaskAttemptContext context) throws IOException, InterruptedException {
 		// TODO Auto-generated method stub
 		System.out.println("gergergergergr:"+context.getConfiguration().get(FileInputFormat.INPUT_DIR));
-		file=context.getConfiguration().get(FileInputFormat.INPUT_DIR);
-		//GZip test=new GZip(file);
-		String outputpath=file.substring(0, file.lastIndexOf('/'));
-		GZip turn=new GZip("/home/yjw/Desktop/test.tar.gz");
-		String t=turn.unTargzFile("/home/yjw/Desktop/test.tar.gz", "/home/yjw/Desktop");
-		System.out.println("desk:"+t);
 		keyvalue=new LinkedList<String>();
+		file=context.getConfiguration().get(FileInputFormat.INPUT_DIR);
+		String outputpath=file.substring(file.indexOf(':')+1,file.length());
+		System.out.println("outputPath:"+outputpath);
+		String path=outputpath.substring(0, outputpath.lastIndexOf('/'));
+		System.out.println("path"+path);
+		GZip turn=new GZip(outputpath);
+		String tfile=turn.unTargzFile(outputpath, path);
+		
 	/*	GoldwindToCSV turn2=new GoldwindToCSV();
 		turn2.TraversFolder(t);
 			
@@ -62,7 +64,7 @@ public class ImportRecordReader extends RecordReader<Text, Text>{
 		}
 		*/
 		
-		getFileInfo(t);
+		getFileInfo(tfile);
 		
 	}
 	public void getFileInfo(String path) throws IOException

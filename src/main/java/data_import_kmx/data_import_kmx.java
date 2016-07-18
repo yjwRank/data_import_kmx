@@ -67,17 +67,19 @@ public class data_import_kmx {
 	 * 
 	 * @param inputDir    inputPath
 	 * @param outputDir   outputPath
+	 * @throws IOException 
 	 */
-	public data_import_kmx(String inputDir,String outputDir)
+	public data_import_kmx(String inputDir,String outputDir) throws IOException
 	{
-		;
+		System.out.println("main-dik");
+		this.importJob=new ImportJob(inputDir,outputDir);
 	}
 	
 	
-	public data_import_kmx()
+	public data_import_kmx() throws IOException
 	{
 		System.out.println("main-dik");
-		this.importJob=new ImportJob();
+		this.importJob=new ImportJob("/home/yjw/Desktop/test.tar.gz","/home/yjw/Desktop/output");
 	}
 	/**
 	 * set configuration
@@ -130,11 +132,35 @@ public class data_import_kmx {
             e.printStackTrace();
         }
     }
-	public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException, SQLException
+	public static String converToISOTime(String tuibineID) throws ParseException
+	  {
+		  DateFormat turbineID_format=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		  Date turbineID_date=turbineID_format.parse(tuibineID);
+		  TimeZone tz=TimeZone.getTimeZone("UTC");
+		  DateFormat df=new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+		  df.setTimeZone(tz);
+		  turbineID_format.setLenient(false);
+		  String ISOTime=df.format(turbineID_date);
+		  
+		  Date now=new Date();
+		  if(turbineID_date.after(now))
+			  return null;
+		  
+		  
+		  try{
+			  turbineID_format.parse(tuibineID);
+			  return ISOTime;
+		  }catch(Exception e)
+		  {
+			  return null;
+		  }
+		  //return ISOTime;
+	  }
+	public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException, SQLException, ParseException
 	{
-		/*System.out.println("main");
-		data_import_kmx test=new data_import_kmx();
-		test.run();*/
+		System.out.println("main");
+		data_import_kmx test=new data_import_kmx("/home/yjw/Desktop/test.tar.gz","/home/yjw/Desktop/output");
+		test.run();
 		
 		/***
 		 *  Map => Reduce finished Map Reduce 
