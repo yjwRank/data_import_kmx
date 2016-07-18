@@ -134,8 +134,8 @@ public class data_import_kmx {
 	{
 		/*System.out.println("main");
 		data_import_kmx test=new data_import_kmx();
-		test.run();
-		*/
+		test.run();*/
+		
 		/***
 		 *  Map => Reduce finished Map Reduce 
 		 */
@@ -150,7 +150,7 @@ public class data_import_kmx {
 		
 		test2.ZipToDB(t);*/
 	//	test2.DbToCSV(t);
-		String filename="/home/yjw/Desktop/output1/GW150001201504/GW15000120150424.db";
+	/*	String filename="/home/yjw/Desktop/output1/GW150001201504/GW15000120150424.db";
         String outputFile="/home/yjw/Desktop/output1/GW150001201504/GW15000120150424.db.csv";
         System.out.println("outputFile:"+outputFile);
         BufferedWriter bw = new BufferedWriter(new FileWriter(outputFile));
@@ -159,6 +159,8 @@ public class data_import_kmx {
 		ResultSet rs = stmt.executeQuery("select * from RUNDATA");
 		ResultSetMetaData rsmd=rs.getMetaData();
 		String name=null;
+		String TuiName=filename.substring(filename.lastIndexOf('/')+1,filename.lastIndexOf('.'));
+		TuiName=TuiName.substring(0, TuiName.length()-8);
 		int colNum = rs.getMetaData().getColumnCount();
 		for(int i=1;i<=colNum;i++)
 		{
@@ -166,18 +168,18 @@ public class data_import_kmx {
 			name=rsmd.getColumnName(i);
 			bw.write(name+",");
 		}
-		bw.write(rs.getString(colNum)+"\n");
+		bw.write("turbneID"+"\n");
 		System.out.println("colNum:"+colNum);
 		while(rs.next()) {
-			for(int i = 1; i < colNum; i++) {
+			for(int i = 1; i <= colNum; i++) {
 				bw.write(rs.getString(i) + ",");
 			}
-			bw.write(rs.getString(colNum) + "\n");
+			bw.write(TuiName + "\n");
 		}
 		conn.close();
 		bw.flush();
 		bw.close();
-	
+	*/
 	}
 	
 	

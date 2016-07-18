@@ -42,6 +42,9 @@ public class GoldwindToCSV {
 			            		Statement stmt = conn.createStatement();
 			            		ResultSet rs = stmt.executeQuery("select * from RUNDATA");
 			            		ResultSetMetaData rsmd=rs.getMetaData();
+			            		String TuiName=null;
+			            		TuiName=filename.substring(filename.lastIndexOf('/')+1,filename.lastIndexOf('.'));
+			            		TuiName=TuiName.substring(0, TuiName.length()-8);
 			            		String name=null;
 			            		int colNum = rs.getMetaData().getColumnCount();
 			            		for(int i=1;i<=colNum;i++)
@@ -50,12 +53,12 @@ public class GoldwindToCSV {
 			            			name=rsmd.getColumnName(i);
 			            			bw.write(name+",");
 			            		}
-			            		bw.write(rs.getString(colNum)+"\n");
+			            		bw.write("turbineID"+"\n");
 			            		while(rs.next()) {
-			            			for(int i = 1; i < colNum; i++) {
+			            			for(int i = 1; i <= colNum; i++) {
 			            				bw.write(rs.getString(i) + ",");
 			            			}
-			            			bw.write(rs.getString(colNum) + "\n");
+			            			bw.write(TuiName + "\n");
 			            		}
 			            		conn.close();
 			            		bw.flush();
