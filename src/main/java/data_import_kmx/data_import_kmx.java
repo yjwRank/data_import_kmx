@@ -21,6 +21,7 @@ import java.util.Vector;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.io.*;
 
 import org.apache.commons.logging.Log;
@@ -156,16 +157,32 @@ public class data_import_kmx {
 		  }
 		  //return ISOTime;
 	  }
+	
 	public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException, SQLException, ParseException
 	{
 		System.out.println("main");
-		data_import_kmx test=new data_import_kmx("/home/yjw/Desktop/test.tar.gz","/home/yjw/Desktop/output");
+		//data_import_kmx test=new data_import_kmx("hdfs://localhost:9000/input/Node/test.tar.gz","hdfs://localhost:9000/input/Node1");
+		Configuration conf = new Configuration();
+	       FileSystem fs = FileSystem.get(URI.create("hdfs://localhost:9000/input/Node1"), conf);
+	       fs.delete(new Path("hdfs://localhost:9000/input/Node1"),true);
+	       //fs.copyFromLocalFile(new Path("/home/yjw/Desktop/test"), new Path("hdfs://localhost:9000/input/Node"));
+	      // fs.delete(new Path("hdfs://localhost:9000/input/Node/test"),true);
+	       
+	//	System.out.println(args[0]);
+	//	System.out.println(args[1]);
+		data_import_kmx test=new data_import_kmx(args[0],args[1]);
+
 		test.run();
-		
+	/*	Configuration conf=new Configuration();
+		FileSystem fs=FileSystem.get(URI.create("/home/yjw"),conf);
+		fs.mkdirs(new Path("/home/yjw/Te"));*/
 		/***
 		 *  Map => Reduce finished Map Reduce 
 		 */
 		
+//		GZip test=new GZip("hdfs://localhost:9000/input/Node/test.tar");
+//		String t=test.unTargzFile("hdfs://localhost:9000/input/Node/test.tar", "hdfs://localhost:9000/input");
+		//String str=args[0];
 	/*	GZip test=new GZip("/home/yjw/Desktop/output1/GW150001201504.tar.gz");
 		
 	String t=test.unTargzFile("/home/yjw/Desktop/output1/GW150001201504.tar.gz", "/home/yjw/Desktop/output1");

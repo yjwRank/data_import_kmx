@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +30,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.webapp.hamlet.HamletSpec.Q;
 
 import java.io.BufferedReader;
@@ -36,19 +41,22 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 
 public class analysisCSV {
-		private BufferedReader reader;
+		//private BufferedReader reader;
+		private FSDataInputStream inputStream;
 		private Map<String,String> device;
 		private Map<String,List<String> > sensor;
 		
 		/**
 		 * init
 		 * @param fileName
-		 * @throws UnsupportedEncodingException
-		 * @throws FileNotFoundException
+		 * @throws IOException 
 		 */
-		public analysisCSV(String fileName) throws UnsupportedEncodingException, FileNotFoundException
+		public analysisCSV(String fileName) throws IOException
 		{
-			reader=new BufferedReader(new InputStreamReader(new FileInputStream(fileName),"UTF-8"));
+			//reader=new BufferedReader(new InputStreamReader(new FileInputStream(fileName),"UTF-8"));
+			Configuration conf=new Configuration();
+			FileSystem fs=FileSystem.get(URI.create(fileName),conf);
+			inputStream=fs.open(new Path(fileName));
 			device=new HashMap<String,String>();
 			sensor=new HashMap<String,List<String> >();
 		}
@@ -81,10 +89,10 @@ public class analysisCSV {
 			String line=null;
 			String mark=null;
 			Queue<String> q=new LinkedList<String>();
-			while((line=reader.readLine())!=null)
+			while((line=inputStream.readLine())!=null)
 			{
 				String item[]=line.split(",");
-				
+				System.out.println("CSV:"+line);
 				if(item[0].contains("<"))
 				{
 					if(item[0].contains("deviceType"))

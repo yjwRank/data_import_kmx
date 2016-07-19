@@ -89,6 +89,7 @@ public class ImportJob {
 		System.out.println("importJob-run");
 		deleteDir(new File("/home/yjw/Desktop/output"));
 		 job=Job.getInstance(conf,"import data kmx");
+		 job.setJarByClass(data_import_kmx.class);
 	//	FileInputFormat.addInputPath(job, new Path("/home/yjw/Desktop/test.tar.gz"));
 		//FileInputFormat.addInputPath(job, new Path("/home/yjw/Desktop/input/mrtest.csv"));
 	//	FileOutputFormat.setOutputPath(job, new Path("/home/yjw/Desktop/output"));
