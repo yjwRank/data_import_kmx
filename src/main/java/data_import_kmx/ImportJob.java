@@ -31,13 +31,15 @@ public class ImportJob {
 	private Job job;
 	private String inputPath=null;
 	private String outputPath=null;
-	public ImportJob(String input,String output) throws IOException
+	private String csvfile=null;
+	public ImportJob(String input,String csv,String output) throws IOException
 	{
 		System.out.println("importjob-importjob");
 		conf=new Configuration();
 		//job=Job.getInstance(conf,"import-data-kmx");
 		inputPath=input;
 		outputPath=output;
+		csvfile=csv;
 		setMRJobConf();
 	}
 	
@@ -87,7 +89,7 @@ public class ImportJob {
 	public boolean run() throws IOException, ClassNotFoundException, InterruptedException
 	{
 		System.out.println("importJob-run");
-		deleteDir(new File("/home/yjw/Desktop/output"));
+		//deleteDir(new File("/home/yjw/Desktop/output"));
 		 job=Job.getInstance(conf,"import data kmx");
 		 job.setJarByClass(data_import_kmx.class);
 	//	FileInputFormat.addInputPath(job, new Path("/home/yjw/Desktop/test.tar.gz"));
@@ -95,7 +97,7 @@ public class ImportJob {
 	//	FileOutputFormat.setOutputPath(job, new Path("/home/yjw/Desktop/output"));
 		 FileInputFormat.addInputPath(job, new Path(inputPath));
 		 FileOutputFormat.setOutputPath(job, new Path(outputPath));
-		 FileInputFormat.addInputPath(job, new Path("hdfs://localhost:9000/input/Node/dsd.csv"));
+		 FileInputFormat.addInputPath(job, new Path(csvfile));
 		 
 		 
 		System.exit(job.waitForCompletion(true)?0:1);

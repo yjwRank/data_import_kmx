@@ -8,6 +8,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.net.URL;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -29,6 +30,7 @@ import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -72,9 +74,13 @@ public class ImportRecordReader extends RecordReader<Text, Text>{
 		String file1=file.substring(0, file.lastIndexOf(','));
 		System.out.println("file1："+file1);
 		Configuration conf=new Configuration(); 
+		File directory=new File("");
 		FileSystem fs=FileSystem.get(URI.create(file1.toString()),conf);
-		FileSystem localfs=FileSystem.get(URI.create("/home/yjw"),conf);
-		String loc="/home/yjw/Desktop/NewInput";
+		FileSystem localfs=FileSystem.get(URI.create(directory.getAbsolutePath()),conf);
+
+		//System.out.println("ttttt:"+directory.getCanonicalPath());
+		//System.out.println("ggggg:"+directory.getAbsolutePath());
+		String loc=directory.getAbsolutePath()+"/tmp";
 		localfs.mkdirs(new Path(loc));
 		String fpath=file1.toString().trim();
 		String filename=fpath.substring(fpath.lastIndexOf('/'), fpath.length());
@@ -102,15 +108,20 @@ public class ImportRecordReader extends RecordReader<Text, Text>{
 		String hdfsoutputpath=fpath.substring(0,fpath.lastIndexOf('/'));
 		System.out.println("hdfsoutputpath:"+hdfsoutputpath);
 		String fullpath=hdfsoutputpath+tfile.substring(tfile.lastIndexOf('/'), tfile.length());
+		System.out.println(fullpath);
 		if(fs.exists(new Path(fullpath)))
 		{
 			fs.delete(new Path(fullpath),true);
+		}
+		else
+		{
+			System.out.println("not exit");
 		}
 		fs.copyFromLocalFile(new Path(tfile), new Path(hdfsoutputpath));
 		
 		System.out.println("finish");
 		getFileInfo(fullpath);
-		
+		FileUtils.deleteDirectory(new File(loc));
 	}
 	
 	/*private void mkFolder(String fileName) {

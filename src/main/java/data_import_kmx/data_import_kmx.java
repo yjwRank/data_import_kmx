@@ -70,17 +70,17 @@ public class data_import_kmx {
 	 * @param outputDir   outputPath
 	 * @throws IOException 
 	 */
-	public data_import_kmx(String inputDir,String outputDir) throws IOException
+	public data_import_kmx(String inputDir,String csv,String outputDir) throws IOException
 	{
 		System.out.println("main-dik");
-		this.importJob=new ImportJob(inputDir,outputDir);
+		this.importJob=new ImportJob(inputDir,csv,outputDir);
 	}
 	
 	
 	public data_import_kmx() throws IOException
 	{
 		System.out.println("main-dik");
-		this.importJob=new ImportJob("/home/yjw/Desktop/test.tar.gz","/home/yjw/Desktop/output");
+		//this.importJob=new ImportJob("/home/yjw/Desktop/test.tar.gz","/home/yjw/Desktop/output");
 	}
 	/**
 	 * set configuration
@@ -161,10 +161,16 @@ public class data_import_kmx {
 	public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException, SQLException, ParseException
 	{
 		System.out.println("main");
-		data_import_kmx test=new data_import_kmx("hdfs://localhost:9000/input/Node/test.tar.gz","hdfs://localhost:9000/input/Node1");
+		String str1=args[0];
+		String str2=args[1];
+		String str3=args[2];
+	//	String str1="hdfs://localhost:9000/input/Node/test.tar.gz";
+	//	String str2="hdfs://localhost:9000/input/Node/dsd.csv";
+	//	String str3="hdfs://localhost:9000/input/Node1";
+		data_import_kmx test=new data_import_kmx(str1,str2,str3);
 		Configuration conf = new Configuration();
-	       FileSystem fs = FileSystem.get(URI.create("hdfs://localhost:9000/input/Node1"), conf);
-	       fs.delete(new Path("hdfs://localhost:9000/input/Node1"),true);
+	       FileSystem fs = FileSystem.get(URI.create(str3), conf);
+	       fs.delete(new Path(str3),true);
 	       //fs.copyFromLocalFile(new Path("/home/yjw/Desktop/test"), new Path("hdfs://localhost:9000/input/Node"));
 	      // fs.delete(new Path("hdfs://localhost:9000/input/Node/test"),true);
 	       
