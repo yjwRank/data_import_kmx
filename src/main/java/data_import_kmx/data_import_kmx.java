@@ -161,7 +161,7 @@ public class data_import_kmx {
 	public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException, SQLException, ParseException
 	{
 		System.out.println("main");
-		//data_import_kmx test=new data_import_kmx("hdfs://localhost:9000/input/Node/test.tar.gz","hdfs://localhost:9000/input/Node1");
+		data_import_kmx test=new data_import_kmx("hdfs://localhost:9000/input/Node/test.tar.gz","hdfs://localhost:9000/input/Node1");
 		Configuration conf = new Configuration();
 	       FileSystem fs = FileSystem.get(URI.create("hdfs://localhost:9000/input/Node1"), conf);
 	       fs.delete(new Path("hdfs://localhost:9000/input/Node1"),true);
@@ -170,7 +170,7 @@ public class data_import_kmx {
 	       
 	//	System.out.println(args[0]);
 	//	System.out.println(args[1]);
-		data_import_kmx test=new data_import_kmx(args[0],args[1]);
+		//data_import_kmx test=new data_import_kmx(args[0],args[1],args[2]);
 
 		test.run();
 	/*	Configuration conf=new Configuration();

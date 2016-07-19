@@ -53,70 +53,17 @@ public class ImportMapper extends Mapper<Object,Text,Text,LList>{
     private Map<String,List<String> > sensor=new HashMap<String,List<String> >();
     private Map<String,Map<String,Integer>> t=new HashMap<String,Map<String,Integer>>();
     private Queue<String> que=new LinkedList<String>();
-    public void traverseFolder1(String path) {
-        int fileNum = 0, folderNum = 0;
-        File file = new File(path);
-        if (file.exists()) {
-            LinkedList<File> list = new LinkedList<File>();
-            File[] files = file.listFiles();
-            for (File file2 : files) {
-                if (file2.isDirectory()) {
-                    System.out.println("文件夹1:" + file2.getAbsolutePath());
-                    list.add(file2);
-                    fileNum++;
-                } else {
-                    System.out.println("文件1:" + file2.getAbsolutePath());
-                    folderNum++;
-                }
-            }
-            File temp_file;
-            while (!list.isEmpty()) {
-                temp_file = list.removeFirst();
-                files = temp_file.listFiles();
-                for (File file2 : files) {
-                    if (file2.isDirectory()) {
-                        System.out.println("文件夹2:" + file2.getAbsolutePath());
-                        list.add(file2);
-                        fileNum++;
-                    } else {
-                        System.out.println("文件2:" + file2.getAbsolutePath());
-                        folderNum++;
-                    }
-                }
-            }
-        } else {
-            System.out.println("文件不存在!");
-        }
-        System.out.println("文件夹共有:" + folderNum + ",文件共有:" + fileNum);
-
-    }
-
+    
     protected void setup(Context context) throws IOException, InterruptedException 
     {
     	String fpath=context.getConfiguration().get(FileInputFormat.INPUT_DIR);
     	//String path=fpath.substring(fpath.indexOf(':')+1, fpath.lastIndexOf('/'));
-    	String path=fpath.substring(0, fpath.lastIndexOf('/'));
+    	//String path=fpath.substring(0, fpath.lastIndexOf('/'));
+    	String path=fpath.substring(fpath.indexOf(',')+1,fpath.length());
     	System.out.println("map-setup:"+path);
-    	File file=new File(path);
-   
-    	String analysisFile=null;
-    	/*if(file.exists())
-    	{
-    		File[] files=file.listFiles();
-    		for(File file2:files)
-    		{
-    			String tfile=file2.toString();
-    			System.out.println("tfile:"+tfile);
-    			String tt=tfile.substring(tfile.lastIndexOf('.')+1, tfile.length());
-    			System.out.println("ttt:"+tt);
-    			if(tt.equals("csv"))
-    			{
-    				System.out.println("set tfile:"+tfile);
-    				analysisFile=tfile;
-    			}
-    		}
-    	}*/
-    	Configuration conf = new Configuration();
+    	
+    	String analysisFile=path;
+    /*	Configuration conf = new Configuration();
         FileSystem fs = FileSystem.get(URI.create(path), conf);
     	FileStatus[] status=fs.listStatus(new Path(path));
     	for(FileStatus filet:status)
@@ -129,8 +76,9 @@ public class ImportMapper extends Mapper<Object,Text,Text,LList>{
     			analysisFile=tmp;
     		}
     		
-    	}
+    	}*/
     	//analysisCSV test=new analysisCSV("/home/yjw/Desktop/input/dsd.csv");
+    	
     	analysisCSV test=new analysisCSV(analysisFile);
     	test.CSVtoMap();
     	device=test.getDevice();

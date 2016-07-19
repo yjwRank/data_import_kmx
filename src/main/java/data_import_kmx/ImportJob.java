@@ -95,7 +95,9 @@ public class ImportJob {
 	//	FileOutputFormat.setOutputPath(job, new Path("/home/yjw/Desktop/output"));
 		 FileInputFormat.addInputPath(job, new Path(inputPath));
 		 FileOutputFormat.setOutputPath(job, new Path(outputPath));
-		
+		 FileInputFormat.addInputPath(job, new Path("hdfs://localhost:9000/input/Node/dsd.csv"));
+		 
+		 
 		System.exit(job.waitForCompletion(true)?0:1);
 		return false;
 	}

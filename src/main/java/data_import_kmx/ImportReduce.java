@@ -117,6 +117,7 @@ public class ImportReduce extends Reducer<Text,LList,NullWritable,Text>{
     		}
     	}
   //  	mos.write(NullWritable.get(), new Text(buffer), "/home/yjw/Desktop/output/test.csv");	
+    	
     	mos.write(NullWritable.get(), new Text(buffer), tit.getname());
     }
    

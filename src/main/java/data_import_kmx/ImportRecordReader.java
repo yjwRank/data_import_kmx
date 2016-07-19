@@ -41,6 +41,7 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 
 public class ImportRecordReader extends RecordReader<Text, Text>{
@@ -50,6 +51,7 @@ public class ImportRecordReader extends RecordReader<Text, Text>{
 	private String file;
 	private List<File> filelist;
 	private Queue<String> keyvalue;
+	private String outpath;
 	public static final Log LOG = LogFactory.getLog(ImportRecordReader.class);
 	@Override
 	public void initialize(InputSplit split, TaskAttemptContext context) throws IOException, InterruptedException {
@@ -65,16 +67,20 @@ public class ImportRecordReader extends RecordReader<Text, Text>{
 		String tfile=turn.unTargzFile(outputpath, path);*/
 		
 		file=context.getConfiguration().get(FileInputFormat.INPUT_DIR);
+		System.out.println("importRecorde:"+file);
+		outpath=context.getConfiguration().get(FileOutputFormat.OUTDIR);
+		String file1=file.substring(0, file.lastIndexOf(','));
+		System.out.println("file1："+file1);
 		Configuration conf=new Configuration(); 
-		FileSystem fs=FileSystem.get(URI.create(file.toString()),conf);
+		FileSystem fs=FileSystem.get(URI.create(file1.toString()),conf);
 		FileSystem localfs=FileSystem.get(URI.create("/home/yjw"),conf);
 		String loc="/home/yjw/Desktop/NewInput";
 		localfs.mkdirs(new Path(loc));
-		String fpath=file.toString().trim();
+		String fpath=file1.toString().trim();
 		String filename=fpath.substring(fpath.lastIndexOf('/'), fpath.length());
 		String locfile=loc+filename;
 		System.out.println("locfile:"+locfile);
-		fs.copyToLocalFile(new Path(file), new Path(locfile));
+		fs.copyToLocalFile(new Path(file1), new Path(locfile));
 		keyvalue=new LinkedList<String>();
 		String path=locfile.substring(0,locfile.lastIndexOf('/'));
 		GZip turn=new GZip(locfile);
@@ -161,15 +167,16 @@ public class ImportRecordReader extends RecordReader<Text, Text>{
 	{
 		
 		//BufferedReader reader =new BufferedReader(new InputStreamReader(new FileInputStream(file),"UTF-8"));
-		String name=file.toString();
+		String name1=file.toString();
+		String name=outpath+name1.substring(name1.lastIndexOf('/'), name1.length());
 		String line=null;
 		//Map<String,String> tmp=new HashMap<String,String>();
-		System.out.println("read file");
 		Configuration conf=new Configuration();
 		FileSystem fs =FileSystem.get(URI.create(file),conf);
 		FSDataInputStream inputStream=fs.open(new Path(file));
 		while((line=inputStream.readLine())!=null)
 		{
+			
 			keyvalue.add(name+"$"+line);
 			//System.out.println("line+:"+line);
 		}
