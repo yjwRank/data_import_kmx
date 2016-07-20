@@ -8,62 +8,63 @@ import java.util.List;
 
 import org.apache.hadoop.io.Writable;
 
-public class LList implements Writable{
+public class LList implements Writable {
 	private List title;
 	private String name;
-	public LList()
-	{
-		title=new LinkedList();
-		name=null;
+
+	public LList() {
+		title = new LinkedList();
+		name = null;
 	}
 	
-	public void add(int num)
+	public void Settitle(int index,int Num)
 	{
+		title.set(index, Num);
+	}
+	
+	public List getList()
+	{
+		return title;
+	}
+	public void add(int num) {
 		title.add(num);
 	}
-	
-	public String getname()
-	{
+
+	public String getname() {
 		return name;
 	}
-	public void setName(String name)
-	{
-		this.name=name;
+
+	public void setName(String name) {
+		this.name = name;
 	}
-	public void clear()
-	{
+
+	public void clear() {
 		title.clear();
 	}
-	
-	public int get(int index)
-	{
+
+	public int get(int index) {
 		return (Integer) title.get(index);
 	}
-	
-	public int size()
-	{
+
+	public int size() {
 		return title.size();
 	}
-	
-	public void readFields(DataInput in) throws IOException
-	{
+
+	public void readFields(DataInput in) throws IOException {
 		title.clear();
-		int count=in.readInt();
-		for(int i=0;i<count;i++)
-		{
+		int count = in.readInt();
+		for (int i = 0; i < count; i++) {
 			title.add(in.readInt());
 		}
-		this.name=in.readUTF();
+		this.name = in.readUTF();
 	}
-	
-	public void write(DataOutput out) throws IOException
-	{
+
+	public void write(DataOutput out) throws IOException {
 		out.writeInt(title.size());
-		
-		for(int i=0;i<title.size();i++)
-		{
+
+		for (int i = 0; i < title.size(); i++) {
 			out.writeInt((Integer) title.get(i));
-			
+
 		}
 		out.writeUTF(this.name);
 	}
