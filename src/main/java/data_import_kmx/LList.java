@@ -11,12 +11,22 @@ import org.apache.hadoop.io.Writable;
 public class LList implements Writable {
 	private List title;
 	private String name;
+	private boolean WMAN_Tm;
 
 	public LList() {
 		title = new LinkedList();
 		name = null;
+		WMAN_Tm=true;
 	}
 	
+	public void setWMAN_Tm(boolean t)
+	{
+		WMAN_Tm=t;
+	}
+	public boolean getWMAN_Tm()
+	{
+		return WMAN_Tm;
+	}
 	public void Settitle(int index,int Num)
 	{
 		title.set(index, Num);
@@ -57,6 +67,7 @@ public class LList implements Writable {
 			title.add(in.readInt());
 		}
 		this.name = in.readUTF();
+		this.WMAN_Tm=in.readBoolean();
 	}
 
 	public void write(DataOutput out) throws IOException {
@@ -67,5 +78,6 @@ public class LList implements Writable {
 
 		}
 		out.writeUTF(this.name);
+		out.writeBoolean(this.WMAN_Tm);
 	}
 }

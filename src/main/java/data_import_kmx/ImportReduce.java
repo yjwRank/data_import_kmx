@@ -77,7 +77,7 @@ public class ImportReduce extends Reducer<Text, LList, NullWritable, Text> {
 	}
 
 	public void reduce(Text key, Iterable<LList> title, Context context) throws IOException, InterruptedException {
-
+		System.out.println("RRRR");
 		for (LList tit : title) {
 			String buffer = "";
 			String line = key.toString();
@@ -89,38 +89,51 @@ public class ImportReduce extends Reducer<Text, LList, NullWritable, Text> {
 			} else {
 				System.out.println("right:" + token1.length + " name:" + tit.getname());
 				for (int i = 0; i < token1.length; i++)
+				{
 					vec.add("0");
+					System.out.println("v:"+token1[i]);
+				}
+				System.out.println("begin re");
 				for (int i = 0; i < tit.size(); i++) {
+					System.out.println("token："+token1[i]+" tit.get:"+tit.get(i));
 					vec.setElementAt(token1[i], tit.get(i));
 				}
 			}
+
 			if (vec.size() > 0) {
 				buffer += vec.get(0);
-				buffer += ',';
-				try {
-					String tmp = converToISOTime(vec.get(1));
-					if (tmp == null)
-					{
-						String name=tit.getname();
-						errType="not a date or after Now";
-						String errmessage=line+"  in file:"+name+" errType:"+errType;
-						mos.write(NullWritable.get(), new Text(errmessage),name.substring(0, name.lastIndexOf('/'))+"/err");
-						return ;
+				int i=1;
+				if(tit.getWMAN_Tm()==true)
+				{
+					try {
+						String tmp = converToISOTime(vec.get(i));
+						if (tmp == null)
+						{
+							String name=tit.getname();
+							errType="not a date or after Now";
+							String errmessage=line+"  in file:"+name+" errType:"+errType;
+							mos.write(NullWritable.get(), new Text(errmessage),name.substring(0, name.lastIndexOf('/'))+"/err");
+							return ;
+						}
+						buffer += ',';
+						buffer += tmp;
+						i++;
+					} catch (ParseException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
-					buffer += tmp;
-				} catch (ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 				}
-				for (int i = 1; i < vec.size(); i++) {
+				
+				for (; i < vec.size(); i++) {
 					buffer += ",";
 					buffer += vec.get(i);
 				}
+				
 			}
 			// mos.write(NullWritable.get(), new Text(buffer),
 			// "/home/yjw/Desktop/output/test.csv");
 			LOG.info("*********:" + key + "   tit:" + tit.getname());
-
+System.out.println("buffer:"+buffer+"  tit:"+tit.getname());
 			mos.write(NullWritable.get(), new Text(buffer), tit.getname());
 			break;
 		}

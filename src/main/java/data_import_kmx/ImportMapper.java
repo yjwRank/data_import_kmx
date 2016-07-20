@@ -132,7 +132,6 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 		String token;
 		System.out.println("map-key:" + key + " map-value:" + value);
 		
-		
 		if(line.charAt(0)=='W')
 		{
 			WMAN_Tm = -1;
@@ -151,18 +150,33 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 		{
 			String[] item2 = line.split(",");
 			title.clear();
-			System.out.println("tuibi:" + tuibineId_loc);
+			title.setWMAN_Tm(true);
+			System.out.println("tuibi:" + tuibineId_loc+"  WMA:"+WMAN_Tm);
 			String Key = item2[tuibineId_loc];
-
+			
 			for (int i = 0; i < item.length; i++) {
+				System.out.println("toke:"+item[i]);
 				if (i == tuibineId_loc) {
+			
 					title.add(0);
 				} else if (i == WMAN_Tm) {
 					title.add(1);
 				} else {
-					if(t.get(Key).get(item[i])!=null)
 						title.add(t.get(Key).get(item[i]));
 				}
+			}
+			if(WMAN_Tm==-1)
+			{
+				
+				for(int i=0;i<title.size();i++)
+				{
+					int num=title.get(i);
+					if(num!=0)
+					{
+						title.Settitle(i, num-1);
+					}
+				}
+				title.setWMAN_Tm(false);
 			}
 			title.setName(key.toString());
 			context.write(new Text(line), title);
