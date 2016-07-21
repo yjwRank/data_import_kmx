@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URL;
 import java.sql.SQLException;
@@ -59,6 +60,7 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 	@Override
 	public void initialize(InputSplit split, TaskAttemptContext context) throws IOException, InterruptedException {
 		// TODO Auto-generated method stub
+		
 		file = context.getConfiguration().get(FileInputFormat.INPUT_DIR);
 		//System.out.println("importRecorde:" + file);
 		outpath = context.getConfiguration().get(FileOutputFormat.OUTDIR);
@@ -66,23 +68,27 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 		//System.out.println("file1：" + file1);
 		Configuration conf = new Configuration();
 		File directory = new File("");
+		
 		FileSystem fs = FileSystem.get(URI.create(file1.toString()), conf);
-		FileSystem localfs = FileSystem.get(URI.create(directory.getAbsolutePath()), conf);
+		//FileSystem localfs = FileSystem.get(URI.create(directory.getAbsolutePath()), conf);
 		String loc = directory.getAbsolutePath() + "/tmp";
-		localfs.mkdirs(new Path(loc));
+		File dir=new File(loc);
+		//localfs.mkdirs(new Path(loc));
+		dir.mkdir();
 		String fpath = file1.toString().trim();
 		String filename = fpath.substring(fpath.lastIndexOf('/'), fpath.length());
 		String locfile = loc + filename;
-		//System.out.println("locfile:" + locfile);
-		fs.copyToLocalFile(new Path(file1), new Path(locfile));
+		System.out.println("locfile:" + locfile);
+		fs.copyToLocalFile(new Path(file1), new Path(locfile));System.out.println("GG?");
 		keyvalue = new LinkedList<String>();
 		String path = locfile.substring(0, locfile.lastIndexOf('/'));
+	
 		GZip turn = new GZip(locfile);
 		String tfile = turn.unTargzFile(locfile, path);
 		//System.out.println("tfile:" + tfile);
 		//System.out.println("path:" + path);
 
-		/*GoldwindToCSV turn2 = new GoldwindToCSV();
+		GoldwindToCSV turn2 = new GoldwindToCSV();
 		turn2.TraversFolder(tfile);
 
 		turn2.ZipToDB(tfile);
@@ -92,7 +98,7 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 			e.printStackTrace();
 		} catch (SQLException e) {
 			e.printStackTrace();
-		}*/
+		}
 
 		String hdfsoutputpath = fpath.substring(0, fpath.lastIndexOf('/'));
 		//System.out.println("hdfsoutputpath:" + hdfsoutputpath);
@@ -103,12 +109,17 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 		} else {
 			System.out.println("not exit");
 		}
-		fs.copyFromLocalFile(new Path(tfile), new Path(hdfsoutputpath));
+		//fs.copyFromLocalFile(new Path(tfile), new Path(hdfsoutputpath));
 
 		//System.out.println("finish");
-		getFileInfo(fullpath);
+		//getFileInfo(fullpath);
+		LOG.info("~~~~~~~~~~~~~~~~getInfo");
+		LOG.info("loc"+loc+tfile.substring(tfile.lastIndexOf('/'), tfile.length()));
+		getFileInfo1(loc+tfile.substring(tfile.lastIndexOf('/'), tfile.length()));
+		
 		FileUtils.deleteDirectory(new File(loc));
-		fs.delete(new Path(fullpath));
+		//localfs.delete(new Path(loc));
+		//fs.delete(new Path(fullpath));
 	}
 
 	/*
@@ -139,13 +150,44 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 					q.add(file2);
 				}
 			} else {
+				LOG.info("             wenjian :"+tmp.getPath());
 				System.out.println("文件：" + tmp.getPath());
 				turntomap(tmp.getPath().toString());
 			}
 		}
 
 	}
-
+	public void getFileInfo1(String path) throws IOException
+	{
+		File file=new File(path);
+		if(file.exists())
+		{
+			Queue<File> list=new LinkedList<File>();
+			File[] files=file.listFiles();
+			for(File file2:files)
+			{
+				list.add(file2);
+			}
+			while(list.size()>0)
+			{
+				File tmp=list.poll();
+				if(tmp.isDirectory())
+				{
+					File[] files2=tmp.listFiles();
+					for(File file3:files2)
+					{
+						list.add(file3);
+					}
+				}
+				else
+				{
+					turntomap1(tmp.getAbsolutePath().toString());
+				}
+			}
+			
+			
+		}
+	}
 	public void turntomap(String file) throws IOException {
 
 		// BufferedReader reader =new BufferedReader(new InputStreamReader(new
@@ -162,6 +204,17 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 			keyvalue.add(name + "$" + line);
 			// System.out.println("line+:"+line);
 		}
+	}
+	
+	public void turntomap1(String file) throws IOException{
+		String name1=file;
+		String name = outpath + name1.substring(name1.lastIndexOf('/'), name1.length());
+		String line = null;
+		 BufferedReader reader =  new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+		 while((line=reader.readLine())!=null)
+		 {
+			 keyvalue.add(name+"$"+line);
+		 }
 	}
 
 	@Override

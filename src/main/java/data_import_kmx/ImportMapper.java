@@ -128,10 +128,11 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 		{
 			WMAN_Tm = -1;
 			tuibineId_loc = -1;
+			line=line.replace(".", String.valueOf(""));
 			item=line.split(",");
 			//check
 			for (int i = 0; i < item.length; i++) {
-				if (item[i].equals("WMAN.Tm")) {
+				if (item[i].equals("WMANTm")) {
 					WMAN_Tm = i;
 				} else if (item[i].equals("turbineID")) {
 					tuibineId_loc = i;
