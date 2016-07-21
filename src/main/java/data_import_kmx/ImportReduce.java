@@ -78,15 +78,16 @@ public class ImportReduce extends Reducer<Text, LList, NullWritable, Text> {
 
 	public void reduce(Text key, Iterable<LList> title, Context context) throws IOException, InterruptedException {
 		for (LList tit : title) {
+			//System.out.println("RR");
 			String buffer = "";
 			String line = key.toString();
-			System.out.println("line:"+line);
+			//System.out.println("line:"+line);
 			String[] token1 = line.split(",");
 			Vector<String> vec = new Vector<String>();
 			if (token1.length != tit.size()) {
 				System.out.println("error " + token1.length + " " + tit.size() + "  name:" + tit.getname());
 			} else {
-				System.out.println("right:" + token1.length + " name:" + tit.getname());
+			//	System.out.println("right:" + token1.length + " name:" + tit.getname());
 				for (int i = 0; i < token1.length; i++)
 				{
 					vec.add("0");
@@ -97,10 +98,11 @@ public class ImportReduce extends Reducer<Text, LList, NullWritable, Text> {
 			}
 
 			if (vec.size() > 0) {
-				buffer += vec.get(0);
-				int i=1;
+				
 				if(tit.getWMAN_Tm()==true)
 				{
+					buffer += vec.get(0);
+					int i=1;
 					try {
 						String tmp = converToISOTime(vec.get(i));
 						if (tmp == null)
@@ -118,17 +120,18 @@ public class ImportReduce extends Reducer<Text, LList, NullWritable, Text> {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
+					for (; i < vec.size(); i++) {
+						buffer += ",";
+						buffer += vec.get(i);
 				}
 				
-				for (; i < vec.size(); i++) {
-					buffer += ",";
-					buffer += vec.get(i);
+				
 				}
 				
 			}
 			// mos.write(NullWritable.get(), new Text(buffer),
 			// "/home/yjw/Desktop/output/test.csv");
-			LOG.info("*********:" + key + "   tit:" + tit.getname());
+		//	LOG.info("*********:" + key + "   tit:" + tit.getname());
 			mos.write(NullWritable.get(), new Text(buffer), tit.getname());
 			break;
 		}

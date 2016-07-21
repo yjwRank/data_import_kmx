@@ -79,7 +79,7 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 		String filename = fpath.substring(fpath.lastIndexOf('/'), fpath.length());
 		String locfile = loc + filename;
 		System.out.println("locfile:" + locfile);
-		fs.copyToLocalFile(new Path(file1), new Path(locfile));System.out.println("GG?");
+		fs.copyToLocalFile(new Path(file1), new Path(locfile));
 		keyvalue = new LinkedList<String>();
 		String path = locfile.substring(0, locfile.lastIndexOf('/'));
 	

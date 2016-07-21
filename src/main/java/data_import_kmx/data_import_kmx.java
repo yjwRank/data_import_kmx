@@ -157,9 +157,12 @@ public class data_import_kmx {
 		//String str1 = args[0];
 		//String str2 = args[1];
 		//String str3 = args[2];
-		 String str1="hdfs://localhost:9000/input/Node/test4.tar.gz";
-		 String str2="hdfs://localhost:9000/input/testan/metadata.csv";
-		 String str3="hdfs://localhost:9000/input/Node1";
+		 String str1="hdfs://localhost:9000/input/testin/GW150001201504.tar.gz";
+		 String str2="hdfs://localhost:9000/input/testan";
+		 String filename=str1.substring(str1.lastIndexOf('/')+1,str1.length());
+		 String str3=str1.substring(0,str1.lastIndexOf('/'))+'/'+filename.substring(0, filename.indexOf('.'))+"-result";
+	
+	//	 String str3="hdfs://localhost:9000/input/Node1";
 		
 
 		data_import_kmx test = new data_import_kmx(str1, str2, str3);

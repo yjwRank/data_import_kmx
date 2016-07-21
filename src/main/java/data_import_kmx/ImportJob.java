@@ -101,7 +101,7 @@ public class ImportJob {
 		FileInputFormat.addInputPath(job, new Path(csvfile));
 		int exit=job.waitForCompletion(true)?0:1;
 		//System.exit(job.waitForCompletion(true) ? 0 : 1);
-		renameFile();
+	    renameFile();
 		return false;
 	}
 	
@@ -114,7 +114,12 @@ public class ImportJob {
 		{
 			String name=file.getPath().toString();
 			String filename=name.substring(name.lastIndexOf('/'),name.length());
-			if(filename.contains("err"))
+			
+			if(filename.equals("/err-2"))
+			{
+				;
+			}
+			else if(filename.contains("err-r"))
 			{
 				fs.rename(new Path(name), new Path(outputPath+"/err"));
 			}

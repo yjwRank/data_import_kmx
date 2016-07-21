@@ -21,6 +21,7 @@ import java.util.Vector;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -60,7 +61,8 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 	private Queue<String> tmpkey=new LinkedList<String>();
 	public static final Log LOG = LogFactory.getLog(ImportReduce.class);
 	private String header=null;
-
+	private FSDataOutputStream outputstream;
+	private boolean writerr;
 	protected void setup(Context context) throws IOException, InterruptedException {
 		String fpath = context.getConfiguration().get(FileInputFormat.INPUT_DIR);
 		// String path=fpath.substring(fpath.indexOf(':')+1,
@@ -68,6 +70,11 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 		// String path=fpath.substring(0, fpath.lastIndexOf('/'));
 		String path = fpath.substring(fpath.indexOf(',') + 1, fpath.length());
 		String analysisFile = path;
+		writerr=false;
+		Configuration conf=new Configuration();
+		//String output=context.getConfiguration().get(FileOutputFormat.OUTDIR);
+		//FileSystem fs=FileSystem.get(URI.create(output), conf);
+	//	outputstream=fs.create(new Path(output+"/err-2"));
 		/*
 		 * Configuration conf = new Configuration(); FileSystem fs =
 		 * FileSystem.get(URI.create(path), conf); FileStatus[]
@@ -118,6 +125,19 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 		}
 		
 	}
+	
+	protected void cleanup(Context context)
+			throws IOException, InterruptedException {
+		Configuration conf=new Configuration();
+		
+/*		String output=context.getConfiguration().get(FileOutputFormat.OUTDIR);
+		FileSystem fs=FileSystem.get(URI.create(output+"/err-2"), conf);
+		FileStatus file=fs.getFileStatus(new Path(output+"/err-2"));
+		if(file.getLen()==0)
+		{
+			fs.delete(new Path(output+"/err-2"));
+		}*/
+	}
 
 	public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 
@@ -137,7 +157,7 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 				} else if (item[i].equals("turbineID")) {
 					tuibineId_loc = i;
 				}
-				
+				writerr=true;
 			}
 		}else
 		{
@@ -145,15 +165,26 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 			title.clear();
 			title.setWMAN_Tm(true);
 			String Key = item2[tuibineId_loc];
-			
+		
 			for (int i = 0; i < item.length; i++) {
 				if (i == tuibineId_loc) {
-			
 					title.add(0);
 				} else if (i == WMAN_Tm) {
 					title.add(1);
 				} else {
+					if(t.get(Key).get(item[i])!=null)
+						{
 						title.add(t.get(Key).get(item[i]));
+						}
+					else
+					{
+						if(writerr==true)
+						{
+					//		String message="The file :"+key.toString()+"item "+item[i]+" not find in metadata";
+					//		outputstream.write(message.getBytes());
+							writerr=false;
+						}
+					}
 				}
 			}
 			if(WMAN_Tm==-1)
