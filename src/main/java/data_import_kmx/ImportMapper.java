@@ -67,8 +67,6 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 		// fpath.lastIndexOf('/'));
 		// String path=fpath.substring(0, fpath.lastIndexOf('/'));
 		String path = fpath.substring(fpath.indexOf(',') + 1, fpath.length());
-		System.out.println("map-setup:" + path);
-
 		String analysisFile = path;
 		/*
 		 * Configuration conf = new Configuration(); FileSystem fs =
@@ -89,9 +87,6 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 		device = test.getDevice();
 		sensor = test.getSensor();
 		result=test.getResult();
-		//System.out.println("~~~~~~~~~~~~~re");
-		test.ShowMapResult();
-		//System.out.println("~~~~~~~~~~~~~~e");
 		toReduce = false;
 		que.clear();
 		
@@ -119,7 +114,6 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 			{
 				tmp.put(entry.getValue().get(i), num+i);
 			}
-			//System.out.println("~~~Show"+Key+" value:"+tmp);
 			t.put(Key, tmp);
 		}
 		
@@ -130,8 +124,6 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 		String line = value.toString();
 		StringTokenizer itr = new StringTokenizer(line, ",");
 		String token;
-		System.out.println("map-key:" + key + " map-value:" + value);
-		
 		if(line.charAt(0)=='W')
 		{
 			WMAN_Tm = -1;
@@ -151,11 +143,9 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 			String[] item2 = line.split(",");
 			title.clear();
 			title.setWMAN_Tm(true);
-			System.out.println("tuibi:" + tuibineId_loc+"  WMA:"+WMAN_Tm);
 			String Key = item2[tuibineId_loc];
 			
 			for (int i = 0; i < item.length; i++) {
-				System.out.println("toke:"+item[i]);
 				if (i == tuibineId_loc) {
 			
 					title.add(0);
@@ -180,7 +170,6 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 			}
 			title.setName(key.toString());
 			context.write(new Text(line), title);
-			System.out.println("tt:"+title.getList());
 		}
 		
 		

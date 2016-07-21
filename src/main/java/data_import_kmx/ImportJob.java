@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -98,9 +99,38 @@ public class ImportJob {
 		FileInputFormat.addInputPath(job, new Path(inputPath));
 		FileOutputFormat.setOutputPath(job, new Path(outputPath));
 		FileInputFormat.addInputPath(job, new Path(csvfile));
-
-		System.exit(job.waitForCompletion(true) ? 0 : 1);
+		int exit=job.waitForCompletion(true)?0:1;
+		//System.exit(job.waitForCompletion(true) ? 0 : 1);
+		renameFile();
 		return false;
+	}
+	
+	public void renameFile() throws IOException
+	{
+		Configuration conf=new Configuration();
+		FileSystem fs=FileSystem.get(URI.create(outputPath),conf);
+		FileStatus[] status=fs.listStatus(new Path(outputPath));
+		for(FileStatus file:status)
+		{
+			String name=file.getPath().toString();
+			String filename=name.substring(name.lastIndexOf('/'),name.length());
+			if(filename.contains("err"))
+			{
+				fs.rename(new Path(name), new Path(outputPath+"/err"));
+			}
+			else if(filename.contains("part"))
+			{
+				fs.delete(new Path(name));
+			}
+			else if(filename.contains("-r-"))
+			{
+				fs.rename(new Path(name), new Path(outputPath+filename.substring(0, filename.indexOf('.'))+".csv"));
+			}
+			else if(filename.contains("SUCCESS"))
+			{
+				fs.delete(new Path(name));
+			}
+		}
 	}
 
 	/**

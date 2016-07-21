@@ -108,6 +108,7 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 		//System.out.println("finish");
 		getFileInfo(fullpath);
 		FileUtils.deleteDirectory(new File(loc));
+		fs.delete(new Path(fullpath));
 	}
 
 	/*
@@ -120,7 +121,6 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 	 */
 	public void getFileInfo(String path) throws IOException {
 		int fileNum = 0, folderNum = 0;
-		System.out.print("getFileInfo:" + path);
 		LOG.info("getFileInfor  path:" + path);
 		Configuration conf = new Configuration();
 		FileSystem fs = FileSystem.get(URI.create(path), conf);
@@ -162,7 +162,6 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 			keyvalue.add(name + "$" + line);
 			// System.out.println("line+:"+line);
 		}
-		System.out.println("end");
 	}
 
 	@Override
@@ -172,7 +171,6 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 		String v = null;
 		boolean lock = false;
 		if (keyvalue.size() > 0) {
-			//System.out.println("nextKeyValue");
 			String line = keyvalue.poll();
 			k = line.substring(0, line.indexOf('$'));
 			if (line.indexOf('$') + 1 < line.length())
@@ -188,14 +186,12 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 	@Override
 	public Text getCurrentKey() throws IOException, InterruptedException {
 		// TODO Auto-generated method stub
-		System.out.println("kk:" + key);
 		return key;
 	}
 
 	@Override
 	public Text getCurrentValue() throws IOException, InterruptedException {
 		// TODO Auto-generated method stub
-		System.out.println("vv:" + value);
 		return value;
 	}
 

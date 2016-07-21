@@ -175,7 +175,6 @@ public class analysisCSV {
 		line = q.poll();
 		String[] item = line.split(",");
 		for (int i = 0; i < item.length; i++) {
-		   System.out.println("sensor_map:"+item[i].trim());
 			sensor_map.put(item[i].trim(), i);
 		}
 
@@ -211,7 +210,6 @@ public class analysisCSV {
 
 		int num_deviceTypeId = Device_map.get("deviceTypeId");
 		int num_id = Device_map.get("id");
-
 		while (q.size() > 0) {
 			line = q.poll();
 			item = line.split(",");
