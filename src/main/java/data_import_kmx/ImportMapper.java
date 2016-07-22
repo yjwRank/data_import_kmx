@@ -95,7 +95,9 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 		sensor = test.getSensor();
 		result=test.getResult();
 		toReduce = false;
+		test.ShowMapResult();
 		que.clear();
+		System.out.println("theeee");
 		
 		/*for (Map.Entry<String, List<String>> entry : sensor.entrySet()) {
 			// System.out.println("Key= "+entry.getKey()+" Value=
@@ -139,10 +141,11 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 	}
 
 	public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-
+		System.out.println("mmm");
 		String line = value.toString();
 		StringTokenizer itr = new StringTokenizer(line, ",");
 		String token;
+		System.out.println("line:"+line);
 		if(line.charAt(0)=='W')
 		{
 			WMAN_Tm = -1;
@@ -160,12 +163,14 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 			}
 		}else
 		{
+			
 			String[] item2 = line.split(",");
 			title.clear();
 			title.setWMAN_Tm(true);
 			String Key = item2[tuibineId_loc];
-		
+			System.out.println("kkk:"+Key);
 			for (int i = 0; i < item.length; i++) {
+				System.out.println("itme:"+item[i]);
 				if (i == tuibineId_loc) {
 					title.add(0);
 				} else if (i == WMAN_Tm) {
@@ -200,6 +205,7 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 				title.setWMAN_Tm(false);
 			}
 			title.setName(key.toString());
+			System.out.println("ooooo");
 			context.write(new Text(line), title);
 		}
 		

@@ -63,7 +63,7 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 	//	System.out.println("~~~~~~~~~~~~~split:"+split+" "+split);
 		//LOG.info("************************:"+split);
 		file=split.toString().substring(0,split.toString().lastIndexOf(':')).trim();
-	//	System.out.println("file:"+file);
+		System.out.println("file:"+file);
 		//file = context.getConfiguration().get(FileInputFormat.INPUT_DIR);
 		//System.out.println("importRecorde:" + file);
 		outpath = context.getConfiguration().get(FileOutputFormat.OUTDIR);
@@ -86,13 +86,12 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 		fs.copyToLocalFile(new Path(file1), new Path(locfile));
 		keyvalue = new LinkedList<String>();
 		String path = locfile.substring(0, locfile.lastIndexOf('/'));
-	
 		GZip turn = new GZip(locfile);
 		String tfile = turn.unTargzFile(locfile, path);
 	//	System.out.println("tfile:" + tfile);
 		//System.out.println("path:" + path);
 
-		GoldwindToCSV turn2 = new GoldwindToCSV();
+	/*	GoldwindToCSV turn2 = new GoldwindToCSV();
 		turn2.TraversFolder(tfile);
 
 		turn2.ZipToDB(tfile);
@@ -103,7 +102,7 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-
+*/
 		String hdfsoutputpath = fpath.substring(0, fpath.lastIndexOf('/'));
 		//System.out.println("hdfsoutputpath:" + hdfsoutputpath);
 		String fullpath = hdfsoutputpath + tfile.substring(tfile.lastIndexOf('/'), tfile.length());
@@ -120,12 +119,14 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 
 		//System.out.println("finish");
 		//getFileInfo(fullpath);
+		
 		LOG.info("~~~~~~~~~~~~~~~~getInfo");
 		LOG.info("loc"+loc+tfile.substring(tfile.lastIndexOf('/'), tfile.length()));
 	//	System.out.println("getinfo1");
 		getFileInfo1(loc+tfile.substring(tfile.lastIndexOf('/'), tfile.length()));
 	//	System.out.println("getinfo2");
 		FileUtils.deleteDirectory(new File(loc));
+		
 		//localfs.delete(new Path(loc));
 		//fs.delete(new Path(fullpath));
 	}
@@ -167,7 +168,7 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 	}
 	public void getFileInfo1(String path) throws IOException
 	{
-	//	System.out.println("getFileInfo");
+		System.out.println("getFileInfo");
 		File file=new File(path);
 		if(file.exists())
 		{
@@ -216,6 +217,7 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 	}
 	
 	public void turntomap1(String file) throws IOException{
+		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 		String name1=file;
 		String name = outpath + name1.substring(name1.lastIndexOf('/'), name1.length());
 		String line = null;

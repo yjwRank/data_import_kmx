@@ -119,6 +119,7 @@ public class analysisCSV {
 				CSVtoMap();
 			}
 		}
+		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 	}
 	/**
 	 * CSV to Map Map

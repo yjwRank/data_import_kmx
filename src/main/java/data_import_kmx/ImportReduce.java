@@ -78,7 +78,7 @@ public class ImportReduce extends Reducer<Text, LList, NullWritable, Text> {
 
 	public void reduce(Text key, Iterable<LList> title, Context context) throws IOException, InterruptedException {
 		for (LList tit : title) {
-			//System.out.println("RR");
+			System.out.println("RR");
 			String buffer = "";
 			String line = key.toString();
 			//System.out.println("line:"+line);
