@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Queue;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -31,6 +32,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 
 import java.io.File;
@@ -151,18 +153,111 @@ public class data_import_kmx {
 		// return ISOTime;
 	}
 
+	
+	public static void renameFile(String outputPath) throws IOException
+	{
+		Configuration conf=new Configuration();
+		FileSystem fs=FileSystem.get(URI.create(outputPath),conf);
+		FileStatus[] status=fs.listStatus(new Path(outputPath));
+		Queue<FileStatus> q=new LinkedList<FileStatus>();
+		for(FileStatus f:status)
+		{
+			q.add(f);
+		}
+		while(q.size()>0)
+		{
+			FileStatus file=q.poll();
+			if(file.isDirectory())
+			{
+				System.out.println("file:"+file.getPath().toString());
+				FileStatus[] status2=fs.listStatus(new Path(file.getPath().toString()));
+				for(FileStatus f2:status2)
+				{
+					System.out.println("f2:"+f2.getPath());
+					q.add(f2);
+				}
+			}
+			else
+			{
+				String name=file.getPath().toString();
+			//	String filename=name.substring(name.lastIndexOf('/'),name.length());
+				String filename=name;
+				System.out.println("filename:"+filename);
+				if(filename.contains("/err-2"))
+				{
+					if(file.getLen()==0)
+					{
+						//fs.delete(new Path(name));
+						System.out.println("000");
+					}
+				}
+				else if(filename.contains("err-r"))
+				{
+					//fs.rename(new Path(name), new Path(outputPath+"/err"));
+					System.out.println("err-r");
+				}
+				else if(filename.contains("part"))
+				{
+					//fs.delete(new Path(name));
+					System.out.println("part");
+				}
+				else if(filename.contains("-r-"))
+				{
+					//fs.rename(new Path(name), new Path(outputPath+filename.substring(0, filename.indexOf('.'))+".csv"));
+					System.out.println("-r-");
+				}
+				else if(filename.contains("SUCCESS"))
+				{
+					//fs.delete(new Path(name));
+					System.out.println("SUCCESS");
+				}
+			}
+			
+		}
+		/*for(FileStatus file:status)
+		{
+			String name=file.getPath().toString();
+			String filename=name.substring(name.lastIndexOf('/'),name.length());
+			
+			if(filename.equals("/err-2"))
+			{
+				if(file.getLen()==0)
+				{
+					fs.delete(new Path(name));
+				}
+			}
+			else if(filename.contains("err-r"))
+			{
+				fs.rename(new Path(name), new Path(outputPath+"/err"));
+			}
+			else if(filename.contains("part"))
+			{
+				fs.delete(new Path(name));
+			}
+			else if(filename.contains("-r-"))
+			{
+				fs.rename(new Path(name), new Path(outputPath+filename.substring(0, filename.indexOf('.'))+".csv"));
+			}
+			else if(filename.contains("SUCCESS"))
+			{
+				fs.delete(new Path(name));
+			}
+		}*/
+	}
 	public static void main(String[] args)
 			throws IOException, ClassNotFoundException, InterruptedException, SQLException, ParseException {
 		System.out.println("main");
-		//String str1 = args[0];
-		//String str2 = args[1];
-		//String str3 = args[2];
-		 String str1="hdfs://localhost:9000/input/testin/GW150001201504.tar.gz";
-		 String str2="hdfs://localhost:9000/input/testan";
+		String str1 = args[0];
+		String str2 = args[1];
+		String str3 = args[2];
+		//String str1="hdfs://localhost:9000/input/testin";
+		 //String str1="hdfs://localhost:9000/input/testin/GW150001201504.tar.gz";
+		// String str2="hdfs://localhost:9000/input/testan";
 		 String filename=str1.substring(str1.lastIndexOf('/')+1,str1.length());
-		 String str3=str1.substring(0,str1.lastIndexOf('/'))+'/'+filename.substring(0, filename.indexOf('.'))+"-result";
+		// String str3=str1.substring(0,str1.lastIndexOf('/'))+'/'+filename.substring(0, filename.indexOf('.'))+"-result";
 	
-	//	 String str3="hdfs://localhost:9000/input/Node1";
+		// String str3="hdfs://localhost:9000/input/testout";
+		 //String str3=str1+"/result";
 		
 
 		data_import_kmx test = new data_import_kmx(str1, str2, str3);
@@ -171,7 +266,7 @@ public class data_import_kmx {
 		fs.delete(new Path(str3), true);
 
 		test.run();
-		
+		//renameFile("hdfs://localhost:9000/input/testout");
 
 		// fs.copyFromLocalFile(new Path("/home/yjw/Desktop/test"), new
 		// Path("hdfs://localhost:9000/input/Node"));

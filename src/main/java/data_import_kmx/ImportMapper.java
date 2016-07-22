@@ -72,9 +72,9 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 		String analysisFile = path;
 		writerr=false;
 		Configuration conf=new Configuration();
-		//String output=context.getConfiguration().get(FileOutputFormat.OUTDIR);
-		//FileSystem fs=FileSystem.get(URI.create(output), conf);
-	//	outputstream=fs.create(new Path(output+"/err-2"));
+		String output=context.getConfiguration().get(FileOutputFormat.OUTDIR);
+		FileSystem fs=FileSystem.get(URI.create(output+"/err-2"), conf);
+		outputstream=fs.create(new Path(output+"/err-2"));
 		/*
 		 * Configuration conf = new Configuration(); FileSystem fs =
 		 * FileSystem.get(URI.create(path), conf); FileStatus[]
@@ -123,14 +123,13 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 			}
 			t.put(Key, tmp);
 		}
-		
 	}
 	
 	protected void cleanup(Context context)
 			throws IOException, InterruptedException {
 		Configuration conf=new Configuration();
-		
-/*		String output=context.getConfiguration().get(FileOutputFormat.OUTDIR);
+		//outputstream.close();
+		/*String output=context.getConfiguration().get(FileOutputFormat.OUTDIR);
 		FileSystem fs=FileSystem.get(URI.create(output+"/err-2"), conf);
 		FileStatus file=fs.getFileStatus(new Path(output+"/err-2"));
 		if(file.getLen()==0)
@@ -180,8 +179,8 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 					{
 						if(writerr==true)
 						{
-					//		String message="The file :"+key.toString()+"item "+item[i]+" not find in metadata";
-					//		outputstream.write(message.getBytes());
+							String message="The file :"+key.toString()+"item "+item[i]+" not find in metadata";
+							outputstream.write(message.getBytes());
 							writerr=false;
 						}
 					}

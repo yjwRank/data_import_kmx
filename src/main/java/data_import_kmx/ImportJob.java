@@ -9,7 +9,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,6 +26,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.MRJobConfig;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+
 
 public class ImportJob {
 
@@ -99,8 +102,10 @@ public class ImportJob {
 		FileInputFormat.addInputPath(job, new Path(inputPath));
 		FileOutputFormat.setOutputPath(job, new Path(outputPath));
 		FileInputFormat.addInputPath(job, new Path(csvfile));
+		FileInputFormat.setInputDirRecursive(job, true);
 		int exit=job.waitForCompletion(true)?0:1;
 		//System.exit(job.waitForCompletion(true) ? 0 : 1);
+		
 	    renameFile();
 		return false;
 	}
@@ -110,14 +115,64 @@ public class ImportJob {
 		Configuration conf=new Configuration();
 		FileSystem fs=FileSystem.get(URI.create(outputPath),conf);
 		FileStatus[] status=fs.listStatus(new Path(outputPath));
-		for(FileStatus file:status)
+		Queue<FileStatus> q=new LinkedList<FileStatus>();
+		for(FileStatus f:status)
+		{
+			q.add(f);
+		}
+		while(q.size()>0)
+		{
+			FileStatus file=q.poll();
+			if(file.isDirectory())
+			{
+				FileStatus[] status2=fs.listStatus(new Path(file.getPath().toString()));
+				for(FileStatus f2:status2)
+				{
+					q.add(f2);
+				}
+			}
+			else
+			{
+				String name=file.getPath().toString();
+				String filename=name;
+				
+				if(filename.contains("/err-2"))
+				{
+					if(file.getLen()==0)
+					{
+						fs.delete(new Path(name));
+					}
+				}
+				else if(filename.contains("err-r"))
+				{
+					fs.rename(new Path(name), new Path(filename.substring(0,filename.lastIndexOf('/'))+"err"));
+				}
+				else if(filename.contains("part"))
+				{
+					fs.delete(new Path(name));
+				}
+				else if(filename.contains("-r-"))
+				{
+					fs.rename(new Path(name), new Path(filename.substring(0, filename.indexOf('.'))+".csv"));
+				}
+				else if(filename.contains("SUCCESS"))
+				{
+					fs.delete(new Path(name));
+				}
+			}
+			
+		}
+		/*for(FileStatus file:status)
 		{
 			String name=file.getPath().toString();
 			String filename=name.substring(name.lastIndexOf('/'),name.length());
 			
 			if(filename.equals("/err-2"))
 			{
-				;
+				if(file.getLen()==0)
+				{
+					fs.delete(new Path(name));
+				}
 			}
 			else if(filename.contains("err-r"))
 			{
@@ -135,7 +190,7 @@ public class ImportJob {
 			{
 				fs.delete(new Path(name));
 			}
-		}
+		}*/
 	}
 
 	/**
@@ -157,7 +212,8 @@ public class ImportJob {
 		// conf.set(MRJobConfig.COMBINE_CLASS_ATTR,
 		// ImportReduce.class.getName());
 		conf.set(MRJobConfig.REDUCE_CLASS_ATTR, ImportReduce.class.getName());
-
+		conf.set("mapreduce.map.memory.mb","8192");
+		conf.set("mapred.child.java.opts", "-Xmx2048m");
 	}
 
 }

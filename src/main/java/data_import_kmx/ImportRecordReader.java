@@ -60,15 +60,19 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 	@Override
 	public void initialize(InputSplit split, TaskAttemptContext context) throws IOException, InterruptedException {
 		// TODO Auto-generated method stub
-		
-		file = context.getConfiguration().get(FileInputFormat.INPUT_DIR);
+	//	System.out.println("~~~~~~~~~~~~~split:"+split+" "+split);
+		//LOG.info("************************:"+split);
+		file=split.toString().substring(0,split.toString().lastIndexOf(':')).trim();
+	//	System.out.println("file:"+file);
+		//file = context.getConfiguration().get(FileInputFormat.INPUT_DIR);
 		//System.out.println("importRecorde:" + file);
 		outpath = context.getConfiguration().get(FileOutputFormat.OUTDIR);
-		String file1 = file.substring(0, file.lastIndexOf(','));
+	//	System.out.println("getinfo1");
+		//String file1 = file.substring(0, file.lastIndexOf(','));
+		String file1=file;
 		//System.out.println("file1：" + file1);
 		Configuration conf = new Configuration();
 		File directory = new File("");
-		
 		FileSystem fs = FileSystem.get(URI.create(file1.toString()), conf);
 		//FileSystem localfs = FileSystem.get(URI.create(directory.getAbsolutePath()), conf);
 		String loc = directory.getAbsolutePath() + "/tmp";
@@ -78,14 +82,14 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 		String fpath = file1.toString().trim();
 		String filename = fpath.substring(fpath.lastIndexOf('/'), fpath.length());
 		String locfile = loc + filename;
-		System.out.println("locfile:" + locfile);
+		//System.out.println("locfile:" + locfile);
 		fs.copyToLocalFile(new Path(file1), new Path(locfile));
 		keyvalue = new LinkedList<String>();
 		String path = locfile.substring(0, locfile.lastIndexOf('/'));
 	
 		GZip turn = new GZip(locfile);
 		String tfile = turn.unTargzFile(locfile, path);
-		//System.out.println("tfile:" + tfile);
+	//	System.out.println("tfile:" + tfile);
 		//System.out.println("path:" + path);
 
 		GoldwindToCSV turn2 = new GoldwindToCSV();
@@ -103,6 +107,9 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 		String hdfsoutputpath = fpath.substring(0, fpath.lastIndexOf('/'));
 		//System.out.println("hdfsoutputpath:" + hdfsoutputpath);
 		String fullpath = hdfsoutputpath + tfile.substring(tfile.lastIndexOf('/'), tfile.length());
+		String dirtmp = context.getConfiguration().get(FileOutputFormat.OUTDIR);
+		dirtmp=dirtmp+tfile.substring(tfile.lastIndexOf('/'), tfile.length());
+		outpath=dirtmp;
 		//System.out.println(fullpath);
 		if (fs.exists(new Path(fullpath))) {
 			fs.delete(new Path(fullpath), true);
@@ -115,8 +122,9 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 		//getFileInfo(fullpath);
 		LOG.info("~~~~~~~~~~~~~~~~getInfo");
 		LOG.info("loc"+loc+tfile.substring(tfile.lastIndexOf('/'), tfile.length()));
+	//	System.out.println("getinfo1");
 		getFileInfo1(loc+tfile.substring(tfile.lastIndexOf('/'), tfile.length()));
-		
+	//	System.out.println("getinfo2");
 		FileUtils.deleteDirectory(new File(loc));
 		//localfs.delete(new Path(loc));
 		//fs.delete(new Path(fullpath));
@@ -159,6 +167,7 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 	}
 	public void getFileInfo1(String path) throws IOException
 	{
+	//	System.out.println("getFileInfo");
 		File file=new File(path);
 		if(file.exists())
 		{
@@ -189,7 +198,7 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 		}
 	}
 	public void turntomap(String file) throws IOException {
-
+		//System.out.println("turntomap");
 		// BufferedReader reader =new BufferedReader(new InputStreamReader(new
 		// FileInputStream(file),"UTF-8"));
 		String name1 = file.toString();
@@ -200,7 +209,7 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 		FileSystem fs = FileSystem.get(URI.create(file), conf);
 		FSDataInputStream inputStream = fs.open(new Path(file));
 		while ((line = inputStream.readLine()) != null) {
-
+			
 			keyvalue.add(name + "$" + line);
 			// System.out.println("line+:"+line);
 		}
@@ -213,6 +222,7 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 		 BufferedReader reader =  new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
 		 while((line=reader.readLine())!=null)
 		 {
+		//	 System.out.println("name:"+name);
 			 keyvalue.add(name+"$"+line);
 		 }
 	}

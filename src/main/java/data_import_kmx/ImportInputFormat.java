@@ -20,9 +20,45 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.util.StopWatch;
+
 
 public class ImportInputFormat extends FileInputFormat<Text, Text> {
 
+	public static final Log LOG = LogFactory.getLog(ImportInputFormat.class);
+	public List<InputSplit> getSplits(JobContext job) throws IOException {	
+		StopWatch sw=new StopWatch().start();
+		List<InputSplit> splits=new ArrayList<InputSplit>();
+		List<FileStatus> files=listStatus(job);
+		FileStatus file;
+		for(int i=0;i<files.size()-1;i++)
+		{
+			file=files.get(i);
+			Path path=file.getPath();
+		//	System.out.println("LOG~~~~~~~~~~~~~~~~~`:"+path);
+		//	LOG.info("LOG~~~~~~~~~~~~~~~~~`:"+path);
+			long length=file.getLen();
+			if(length!=0)
+			{
+				BlockLocation[] blkLocations;
+				if(file instanceof LocatedFileStatus)
+				{
+					blkLocations = ((LocatedFileStatus) file).getBlockLocations();
+				}
+				else
+				{
+					FileSystem fs = path.getFileSystem(job.getConfiguration());
+			        blkLocations = fs.getFileBlockLocations(file, 0, length);
+				}
+				splits.add(makeSplit(path,0,length,blkLocations[0].getHosts(),blkLocations[0].getCachedHosts()));
+			//	System.out.println("splits:"+splits.toString());
+			}
+		}
+		
+	
+		return splits;
+	}
+	
 	@Override
 	public RecordReader<Text, Text> createRecordReader(InputSplit split, TaskAttemptContext context)
 			throws IOException, InterruptedException {
