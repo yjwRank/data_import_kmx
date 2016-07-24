@@ -250,10 +250,10 @@ public class data_import_kmx {
 		//String str1 = args[0];
 		//String str2 = args[1];
 		//String str3 = args[2];
-		String str1="hdfs://localhost:9000/t";
-		 //String str1="hdfs://localhost:9000/input/testin/GW150001201504.tar.gz";
-		String str2="hdfs://localhost:9000/i";
-		 String filename=str1.substring(str1.lastIndexOf('/')+1,str1.length());
+		//String str1="hdfs://localhost:9000/t";
+		 String str1="hdfs://localhost:9000/input/GW150001201504.tar.gz";
+	String str2="hdfs://localhost:9000/an";
+	//	 String filename=str1.substring(str1.lastIndexOf('/')+1,str1.length());
 		// String str3=str1.substring(0,str1.lastIndexOf('/'))+'/'+filename.substring(0, filename.indexOf('.'))+"-result";
 	
 		 String str3="hdfs://localhost:9000/tm";
@@ -284,7 +284,7 @@ public class data_import_kmx {
 		/***
 		 * Map => Reduce finished Map Reduce
 		 */
-
+	
 		// GZip test=new GZip("hdfs://localhost:9000/input/Node/test.tar");
 		// String
 		// t=test.unTargzFile("hdfs://localhost:9000/input/Node/test.tar",

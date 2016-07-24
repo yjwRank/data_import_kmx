@@ -62,6 +62,7 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 		// TODO Auto-generated method stub
 	//	System.out.println("~~~~~~~~~~~~~split:"+split+" "+split);
 		//LOG.info("************************:"+split);
+		System.out.println(context.getConfiguration().get(FileInputFormat.INPUT_DIR));
 		file=split.toString().substring(0,split.toString().lastIndexOf(':')).trim();
 		System.out.println("file:"+file);
 		//file = context.getConfiguration().get(FileInputFormat.INPUT_DIR);
@@ -88,6 +89,7 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 		String path = locfile.substring(0, locfile.lastIndexOf('/'));
 		GZip turn = new GZip(locfile);
 		String tfile = turn.unTargzFile(locfile, path);
+		getFileInfo1(tfile);
 	//	System.out.println("tfile:" + tfile);
 		//System.out.println("path:" + path);
 
@@ -103,7 +105,7 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 			e.printStackTrace();
 		}
 */
-		String hdfsoutputpath = fpath.substring(0, fpath.lastIndexOf('/'));
+/*		String hdfsoutputpath = fpath.substring(0, fpath.lastIndexOf('/'));
 		//System.out.println("hdfsoutputpath:" + hdfsoutputpath);
 		String fullpath = hdfsoutputpath + tfile.substring(tfile.lastIndexOf('/'), tfile.length());
 		String dirtmp = context.getConfiguration().get(FileOutputFormat.OUTDIR);
@@ -128,7 +130,7 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 		FileUtils.deleteDirectory(new File(loc));
 		
 		//localfs.delete(new Path(loc));
-		//fs.delete(new Path(fullpath));
+		//fs.delete(new Path(fullpath));*/
 	}
 
 	/*
@@ -217,16 +219,18 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 	}
 	
 	public void turntomap1(String file) throws IOException{
-		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 		String name1=file;
+		name1=name1.replace(".db", ".csv");
 		String name = outpath + name1.substring(name1.lastIndexOf('/'), name1.length());
-		String line = null;
+/*		String line = null;
 		 BufferedReader reader =  new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
 		 while((line=reader.readLine())!=null)
 		 {
 		//	 System.out.println("name:"+name);
 			 keyvalue.add(name+"$"+line);
-		 }
+		 }*/
+		
+		keyvalue.add(name+"$"+file);
 	}
 
 	@Override

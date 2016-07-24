@@ -8,7 +8,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
+import java.util.zip.Adler32;
+import java.util.zip.CheckedInputStream;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
@@ -33,7 +37,41 @@ public class GZip {
 	public GZip(String fileName) {
 		this.zipfileName = fileName;
 	}
-
+	public void ZipToDB(String filename,String dir)
+	{
+		try {
+	         final int BUFFER = 2048;
+	         BufferedOutputStream dest = null;
+	         FileInputStream fis = new FileInputStream(filename);
+	         CheckedInputStream checksum = new 
+	           CheckedInputStream(fis, new Adler32());
+	         ZipInputStream zis = new 
+	           ZipInputStream(new 
+	             BufferedInputStream(checksum));
+	         ZipEntry entry;
+	         while((entry = zis.getNextEntry()) != null) {
+	        		String tmp=entry.getName();
+	    			String str=dir+"/"+tmp.substring(tmp.lastIndexOf("\\")+1,tmp.length());
+	    			System.out.println("Str:"+str);
+	            int count;
+	            byte data[] = new byte[BUFFER];
+	            // write the files to the disk
+	            FileOutputStream fos = new 
+	              FileOutputStream(str);
+	            dest = new BufferedOutputStream(fos, 
+	              BUFFER);
+	            while ((count = zis.read(data, 0, 
+	              BUFFER)) != -1) {
+	               dest.write(data, 0, count);
+	            }
+	            dest.flush();
+	            dest.close();
+	         }
+	         zis.close();
+	      } catch(Exception e) {
+	         e.printStackTrace();
+	      }
+	   }
 	public String unTargzFile(String rarFileName, String destDir) throws IOException {
 		Configuration conf = new Configuration();
 		FileSystem fs = FileSystem.get(URI.create(zipfileName), conf);
@@ -91,6 +129,8 @@ public class GZip {
 					}
 					bufferedOutputStream.flush();
 					bufferedOutputStream.close();
+					ZipToDB(fileName,outputPath);
+					file.delete();
 				}
 				entry = (TarArchiveEntry) in.getNextEntry();
 			}

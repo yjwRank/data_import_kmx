@@ -31,14 +31,14 @@ public class ImportInputFormat extends FileInputFormat<Text, Text> {
 		List<InputSplit> splits=new ArrayList<InputSplit>();
 		List<FileStatus> files=listStatus(job);
 		FileStatus file;
-		for(int i=0;i<files.size()-1;i++)
+		for(int i=0;i<files.size();i++)
 		{
 			file=files.get(i);
 			Path path=file.getPath();
 		//	System.out.println("LOG~~~~~~~~~~~~~~~~~`:"+path);
 		//	LOG.info("LOG~~~~~~~~~~~~~~~~~`:"+path);
 			long length=file.getLen();
-			if(length!=0)
+			if(length!=0&&path.toString().contains(".tar.gz"))
 			{
 				BlockLocation[] blkLocations;
 				if(file instanceof LocatedFileStatus)
@@ -54,6 +54,7 @@ public class ImportInputFormat extends FileInputFormat<Text, Text> {
 			//	System.out.println("splits:"+splits.toString());
 			}
 		}
+		System.out.println("end:"+splits);
 		
 	
 		return splits;

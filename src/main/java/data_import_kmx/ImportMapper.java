@@ -2,6 +2,12 @@ package data_import_kmx;
 
 import java.io.IOException;
 import java.net.URI;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -142,11 +148,109 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 
 	public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 		System.out.println("mmm");
-		String line = value.toString();
-		StringTokenizer itr = new StringTokenizer(line, ",");
-		String token;
-		System.out.println("line:"+line);
-		if(line.charAt(0)=='W')
+		
+		String filename=value.toString();
+		try {
+			Connection conn=DriverManager.getConnection("jdbc:sqlite:"+filename);
+			Statement stmt=conn.createStatement();
+			ResultSet rs=stmt.executeQuery("select * from RUNDATA");
+			ResultSetMetaData rsmd=rs.getMetaData();
+			String TuiName=null;
+			TuiName = filename.substring(filename.lastIndexOf('/') + 1, filename.lastIndexOf('.'));
+			TuiName = TuiName.substring(0, TuiName.length() - 8);
+			String buffer="";
+			int colNum=rs.getMetaData().getColumnCount();
+			for(int i=1;i<=colNum;i++)
+			{
+				buffer+=rsmd.getColumnName(i);
+				buffer+=",";
+			}
+			buffer+="turbineID";
+			System.out.println("buffer:"+buffer);
+			WMAN_Tm=-1;
+			tuibineId_loc=-1;
+			buffer=buffer.replace(".", String.valueOf(""));
+			item=buffer.split(",");
+			for(int i=0;i<item.length;i++)
+			{
+				if(item[i].equals("WMANTm"))
+				{
+					WMAN_Tm=i;
+				}
+				else if(item[i].equals("turbineID"))
+				{
+					tuibineId_loc=i;
+				}
+			}
+			
+			String line="";
+			rs.next();
+			for(int i=1;i<=colNum;i++)
+			{
+				line+=rs.getString(i);
+				line+=",";
+			}
+			line+=TuiName;
+			title.clear();
+			title.setWMAN_Tm(true);
+			String[] item2=line.split(",");
+			String Key = item2[tuibineId_loc];
+			for(int i=0;i<item.length;i++)
+			{
+				if(i==tuibineId_loc)
+				{
+					title.add(0);
+				}
+				else if(i==WMAN_Tm)
+				{
+					title.add(1);
+				}else
+				{
+					if(t.get(Key).get(item[i])!=null)
+					{
+					title.add(t.get(Key).get(item[i]));
+					}
+				else
+				{
+					if(writerr==true)
+					{
+						String message="The file :"+key.toString()+"item "+item[i]+" not find in metadata";
+						outputstream.write(message.getBytes());
+						writerr=false;
+					}
+				}
+				}
+			}
+			if(WMAN_Tm==-1)
+			{
+				
+				for(int i=0;i<title.size();i++)
+				{
+					int num=title.get(i);
+					if(num!=0)
+					{
+						title.Settitle(i, num-1);
+					}
+				}
+				title.setWMAN_Tm(false);
+			}
+			title.setName(key.toString());
+			do
+			{
+			context.write(new Text(line), title);
+			line="";
+			for(int i=1;i<=colNum;i++)
+			{
+				line+=rs.getString(i);
+				line+=",";
+			}
+			line+=TuiName;
+			}while(rs.next());
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	/*	if(line.charAt(0)=='W')
 		{
 			WMAN_Tm = -1;
 			tuibineId_loc = -1;
@@ -206,7 +310,7 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 			}
 			title.setName(key.toString());
 			System.out.println("ooooo");
-			context.write(new Text(line), title);
+			context.write(new Text(line), title);*/
 		}
 		
 		
@@ -263,4 +367,4 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 		}
 		System.out.println("Map end");*/
 	}
-}
+
