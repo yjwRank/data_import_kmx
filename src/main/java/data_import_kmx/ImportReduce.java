@@ -125,14 +125,23 @@ public class ImportReduce extends Reducer<Text, LList, NullWritable, Text> {
 						buffer += vec.get(i);
 				}
 				
-				
+					mos.write(NullWritable.get(), new Text(buffer), tit.getname());
+				}
+				else
+				{
+					LOG.error("err item");
 				}
 				
 			}
+			else
+			{
+				LOG.error("vec size 0");
+			}
+			
 			// mos.write(NullWritable.get(), new Text(buffer),
 			// "/home/yjw/Desktop/output/test.csv");
 		//	LOG.info("*********:" + key + "   tit:" + tit.getname());
-			mos.write(NullWritable.get(), new Text(buffer), tit.getname());
+			
 			break;
 		}
 

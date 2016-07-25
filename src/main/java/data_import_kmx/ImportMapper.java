@@ -102,7 +102,6 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 		//sensor = test.getSensor();
 		result=test.getResult();
 		toReduce = false;
-		test.ShowMapResult();
 		que.clear();
 		System.out.println("theeee");
 		
@@ -171,6 +170,9 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 			}
 			buffer+="turbineID";
 			System.out.println("buffer:"+buffer);
+			buffer=buffer.trim();
+			if(buffer.charAt(0)=='W')
+			{
 			WMAN_Tm=-1;
 			tuibineId_loc=-1;
 			buffer=buffer.replace(".", String.valueOf(""));
@@ -186,9 +188,16 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 					tuibineId_loc=i;
 				}
 			}
+			}
+			else
+			{
+				LOG.error("don't get title in file:"+filename);
+			}
 			
 			String line="";
-			rs.next();
+			
+			if(rs.next())
+			{
 			for(int i=1;i<=colNum;i++)
 			{
 				line+=rs.getString(i);
@@ -250,6 +259,11 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 			}
 			line+=TuiName;
 			}while(rs.next());
+			}
+			else
+			{
+				LOG.error("don't find data in file:"+filename);
+			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
