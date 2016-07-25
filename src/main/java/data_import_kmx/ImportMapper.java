@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Vector;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -97,8 +98,8 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 		analysisCSV test = new analysisCSV(analysisFile);
 		//test.CSVtoMap();
 		test.Run();
-		device = test.getDevice();
-		sensor = test.getSensor();
+		//device = test.getDevice();
+		//sensor = test.getSensor();
 		result=test.getResult();
 		toReduce = false;
 		test.ShowMapResult();
@@ -144,6 +145,9 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 		{
 			fs.delete(new Path(output+"/err-2"));
 		}*/
+		File dictionery=new File("");
+		String loc=dictionery.getAbsolutePath()+"/tmp";
+		FileUtils.deleteDirectory(new File(loc));
 	}
 
 	public void map(Object key, Text value, Context context) throws IOException, InterruptedException {

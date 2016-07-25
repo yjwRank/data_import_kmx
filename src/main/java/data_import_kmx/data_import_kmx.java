@@ -247,16 +247,16 @@ public class data_import_kmx {
 	public static void main(String[] args)
 			throws IOException, ClassNotFoundException, InterruptedException, SQLException, ParseException {
 		System.out.println("main");
-		//String str1 = args[0];
-		//String str2 = args[1];
-		//String str3 = args[2];
-		//String str1="hdfs://localhost:9000/t";
-		 String str1="hdfs://localhost:9000/input/GW150001201504.tar.gz";
-	String str2="hdfs://localhost:9000/an";
+		String str1 = args[0];
+		String str2 = args[1];
+		String str3 = args[2];
+	//	String str1="hdfs://localhost:9000/t";
+	// String str1="hdfs://localhost:9000/input/testin";
+	//String str2="hdfs://localhost:9000/input/testan";
 	//	 String filename=str1.substring(str1.lastIndexOf('/')+1,str1.length());
 		// String str3=str1.substring(0,str1.lastIndexOf('/'))+'/'+filename.substring(0, filename.indexOf('.'))+"-result";
 	
-		 String str3="hdfs://localhost:9000/tm";
+	//	 String str3="hdfs://localhost:9000/input/tm";
 		 //String str3=str1+"/result";
 		
 

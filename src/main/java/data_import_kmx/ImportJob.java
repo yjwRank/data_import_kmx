@@ -212,8 +212,8 @@ public class ImportJob {
 		// conf.set(MRJobConfig.COMBINE_CLASS_ATTR,
 		// ImportReduce.class.getName());
 		conf.set(MRJobConfig.REDUCE_CLASS_ATTR, ImportReduce.class.getName());
-		conf.set("mapreduce.map.memory.mb","8192");
-		conf.set("mapred.child.java.opts", "-Xmx2048m");
+		//conf.set("mapreduce.map.memory.mb","8192");
+		//conf.set("mapred.child.java.opts", "-Xmx2048m");
 	}
 
 }

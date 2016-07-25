@@ -89,6 +89,7 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 		String path = locfile.substring(0, locfile.lastIndexOf('/'));
 		GZip turn = new GZip(locfile);
 		String tfile = turn.unTargzFile(locfile, path);
+		LOG.info("ImportRecordReader:"+locfile+"  path:"+path);
 		getFileInfo1(tfile);
 	//	System.out.println("tfile:" + tfile);
 		//System.out.println("path:" + path);
@@ -171,6 +172,7 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 	public void getFileInfo1(String path) throws IOException
 	{
 		System.out.println("getFileInfo");
+		LOG.info("GetFileInfo1");
 		File file=new File(path);
 		if(file.exists())
 		{
@@ -193,6 +195,7 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 				}
 				else
 				{
+					LOG.info("tmp:"+tmp.getAbsolutePath());
 					turntomap1(tmp.getAbsolutePath().toString());
 				}
 			}
@@ -229,7 +232,7 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 		//	 System.out.println("name:"+name);
 			 keyvalue.add(name+"$"+line);
 		 }*/
-		
+		LOG.info("turn to map:"+name1);
 		keyvalue.add(name+"$"+file);
 	}
 
