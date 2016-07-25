@@ -77,10 +77,12 @@ public class ImportReduce extends Reducer<Text, LList, NullWritable, Text> {
 	}
 
 	public void reduce(Text key, Iterable<LList> title, Context context) throws IOException, InterruptedException {
+		System.out.println("RR");
 		for (LList tit : title) {
-			System.out.println("RR");
+			
 			String buffer = "";
-			String line = key.toString();
+			//String line = key.toString();
+			String line=tit.getLine();
 			//System.out.println("line:"+line);
 			String[] token1 = line.split(",");
 			Vector<String> vec = new Vector<String>();
@@ -142,7 +144,7 @@ public class ImportReduce extends Reducer<Text, LList, NullWritable, Text> {
 			// "/home/yjw/Desktop/output/test.csv");
 		//	LOG.info("*********:" + key + "   tit:" + tit.getname());
 			
-			break;
+			//break;
 		}
 
 	}

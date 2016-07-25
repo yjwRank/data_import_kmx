@@ -12,13 +12,22 @@ public class LList implements Writable {
 	private List title;
 	private String name;
 	private boolean WMAN_Tm;
+	private String line;
 
 	public LList() {
 		title = new LinkedList();
 		name = null;
 		WMAN_Tm=true;
+		line="";
 	}
-	
+	public void setLine(String l)
+	{
+		line=l;
+	}
+	public String getLine()
+	{
+		return line;
+	}
 	public void setWMAN_Tm(boolean t)
 	{
 		WMAN_Tm=t;
@@ -68,6 +77,7 @@ public class LList implements Writable {
 		}
 		this.name = in.readUTF();
 		this.WMAN_Tm=in.readBoolean();
+		this.line=in.readLine();
 	}
 
 	public void write(DataOutput out) throws IOException {
@@ -79,5 +89,6 @@ public class LList implements Writable {
 		}
 		out.writeUTF(this.name);
 		out.writeBoolean(this.WMAN_Tm);
+		out.writeUTF(this.line);
 	}
 }

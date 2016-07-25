@@ -151,7 +151,7 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 
 	public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 		System.out.println("mmm");
-		
+		System.out.println("Key:"+key+" value:"+value);
 		String filename=value.toString();
 		try {
 			Connection conn=DriverManager.getConnection("jdbc:sqlite:"+filename);
@@ -250,7 +250,9 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 			title.setName(key.toString());
 			do
 			{
-			context.write(new Text(line), title);
+			title.setLine(line);
+			//context.write(new Text(line), title);
+			context.write(new Text(key.toString()), title);
 			line="";
 			for(int i=1;i<=colNum;i++)
 			{
