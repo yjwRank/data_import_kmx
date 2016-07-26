@@ -35,8 +35,6 @@ public class ImportInputFormat extends FileInputFormat<Text, Text> {
 		{
 			file=files.get(i);
 			Path path=file.getPath();
-		//	System.out.println("LOG~~~~~~~~~~~~~~~~~`:"+path);
-		//	LOG.info("LOG~~~~~~~~~~~~~~~~~`:"+path);
 			long length=file.getLen();
 			if(length!=0&&path.toString().contains(".tar.gz"))
 			{
@@ -51,7 +49,6 @@ public class ImportInputFormat extends FileInputFormat<Text, Text> {
 			        blkLocations = fs.getFileBlockLocations(file, 0, length);
 				}
 				splits.add(makeSplit(path,0,length,blkLocations[0].getHosts(),blkLocations[0].getCachedHosts()));
-			//	System.out.println("splits:"+splits.toString());
 			}
 		}
 		System.out.println("end:"+splits);

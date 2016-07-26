@@ -84,18 +84,7 @@ public class GZip {
 		if (!file.exists()) {
 			file.mkdir();
 		}
-		//System.out.println("Tar:" + file.toString());
-		//System.out.println("fgzip:" + file.toString());
 		return gzip.unzipOarFile(outputDirectory);
-		/*
-		 * CompressionCodecFactory factory = new CompressionCodecFactory(conf);
-		 * CompressionCodec codec = factory.getCodec(inputPath); if(codec ==
-		 * null){ System.out.println("no codec found for " + zipfileName);
-		 * System.exit(1); } else { System.out.println("dame++find"); } String
-		 * outputUri=CompressionCodecFactory.removeSuffix(zipfileName,
-		 * codec.getDefaultExtension());
-		 * System.out.println("outputUri:"+outputUri);
-		 */
 	}
 
 	public String unzipOarFile(String outputDirectory) {

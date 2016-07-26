@@ -90,23 +90,16 @@ public class ImportJob {
 	 */
 	public boolean run() throws IOException, ClassNotFoundException, InterruptedException {
 		System.out.println("importJob-run");
-		// deleteDir(new File("/home/yjw/Desktop/output"));
 		job = Job.getInstance(conf, "import data kmx");
 		job.setJarByClass(data_import_kmx.class);
-		// FileInputFormat.addInputPath(job, new
-		// Path("/home/yjw/Desktop/test.tar.gz"));
-		// FileInputFormat.addInputPath(job, new
-		// Path("/home/yjw/Desktop/input/mrtest.csv"));
-		// FileOutputFormat.setOutputPath(job, new
-		// Path("/home/yjw/Desktop/output"));
+		job.addCacheFile(new Path(csvfile).toUri());
 		FileInputFormat.addInputPath(job, new Path(inputPath));
 		FileOutputFormat.setOutputPath(job, new Path(outputPath));
 		FileInputFormat.addInputPath(job, new Path(csvfile));
 		FileInputFormat.setInputDirRecursive(job, true);
 		int exit=job.waitForCompletion(true)?0:1;
-		//System.exit(job.waitForCompletion(true) ? 0 : 1);
-		
 	    renameFile();
+	    System.exit(exit==0?0:1);
 		return false;
 	}
 	
@@ -162,35 +155,6 @@ public class ImportJob {
 			}
 			
 		}
-		/*for(FileStatus file:status)
-		{
-			String name=file.getPath().toString();
-			String filename=name.substring(name.lastIndexOf('/'),name.length());
-			
-			if(filename.equals("/err-2"))
-			{
-				if(file.getLen()==0)
-				{
-					fs.delete(new Path(name));
-				}
-			}
-			else if(filename.contains("err-r"))
-			{
-				fs.rename(new Path(name), new Path(outputPath+"/err"));
-			}
-			else if(filename.contains("part"))
-			{
-				fs.delete(new Path(name));
-			}
-			else if(filename.contains("-r-"))
-			{
-				fs.rename(new Path(name), new Path(outputPath+filename.substring(0, filename.indexOf('.'))+".csv"));
-			}
-			else if(filename.contains("SUCCESS"))
-			{
-				fs.delete(new Path(name));
-			}
-		}*/
 	}
 
 	/**
@@ -204,13 +168,11 @@ public class ImportJob {
 		conf.set(MRJobConfig.MAP_CLASS_ATTR, ImportMapper.class.getName());
 		conf.set(MRJobConfig.INPUT_FORMAT_CLASS_ATTR, ImportInputFormat.class.getName());
 		conf.set(MRJobConfig.MAP_OUTPUT_KEY_CLASS, Text.class.getName());
-		// conf.set(MRJobConfig.MAP_OUTPUT_VALUE_CLASS, Text.class.getName());
+		 conf.set(MRJobConfig.MAP_OUTPUT_VALUE_CLASS, Text.class.getName());
 
-		conf.set(MRJobConfig.MAP_OUTPUT_VALUE_CLASS, LList.class.getName());
+		//conf.set(MRJobConfig.MAP_OUTPUT_VALUE_CLASS, LList.class.getName());
 		conf.set(MRJobConfig.OUTPUT_KEY_CLASS, Text.class.getName());
 		conf.set(MRJobConfig.OUTPUT_VALUE_CLASS, Text.class.getName());
-		// conf.set(MRJobConfig.COMBINE_CLASS_ATTR,
-		// ImportReduce.class.getName());
 		conf.set(MRJobConfig.REDUCE_CLASS_ATTR, ImportReduce.class.getName());
 		//conf.set("mapreduce.map.memory.mb","8192");
 		//conf.set("mapred.child.java.opts", "-Xmx2048m");

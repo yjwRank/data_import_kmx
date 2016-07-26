@@ -90,7 +90,10 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 		GZip turn = new GZip(locfile);
 		String tfile = turn.unTargzFile(locfile, path);
 		LOG.info("ImportRecordReader:"+locfile+"  path:"+path);
-		getFileInfo1(tfile);
+		String outfilename=file.replace(".tar.gz", ".csv");
+		keyvalue.add(outpath+"$"+tfile);
+		
+		//getFileInfo1(tfile);
 	//	System.out.println("tfile:" + tfile);
 		//System.out.println("path:" + path);
 

@@ -1,15 +1,11 @@
 package data_import_kmx;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Queue;
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.StringTokenizer;
@@ -19,9 +15,6 @@ import java.util.LinkedList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
 import java.net.URI;
 import java.io.*;
 
@@ -35,20 +28,10 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
-
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -180,84 +163,49 @@ public class data_import_kmx {
 			else
 			{
 				String name=file.getPath().toString();
-			//	String filename=name.substring(name.lastIndexOf('/'),name.length());
 				String filename=name;
 				System.out.println("filename:"+filename);
 				if(filename.contains("/err-2"))
 				{
 					if(file.getLen()==0)
 					{
-						//fs.delete(new Path(name));
 						System.out.println("000");
 					}
 				}
 				else if(filename.contains("err-r"))
 				{
-					//fs.rename(new Path(name), new Path(outputPath+"/err"));
 					System.out.println("err-r");
 				}
 				else if(filename.contains("part"))
 				{
-					//fs.delete(new Path(name));
 					System.out.println("part");
 				}
 				else if(filename.contains("-r-"))
 				{
-					//fs.rename(new Path(name), new Path(outputPath+filename.substring(0, filename.indexOf('.'))+".csv"));
 					System.out.println("-r-");
 				}
 				else if(filename.contains("SUCCESS"))
 				{
-					//fs.delete(new Path(name));
 					System.out.println("SUCCESS");
 				}
 			}
 			
 		}
-		/*for(FileStatus file:status)
-		{
-			String name=file.getPath().toString();
-			String filename=name.substring(name.lastIndexOf('/'),name.length());
-			
-			if(filename.equals("/err-2"))
-			{
-				if(file.getLen()==0)
-				{
-					fs.delete(new Path(name));
-				}
-			}
-			else if(filename.contains("err-r"))
-			{
-				fs.rename(new Path(name), new Path(outputPath+"/err"));
-			}
-			else if(filename.contains("part"))
-			{
-				fs.delete(new Path(name));
-			}
-			else if(filename.contains("-r-"))
-			{
-				fs.rename(new Path(name), new Path(outputPath+filename.substring(0, filename.indexOf('.'))+".csv"));
-			}
-			else if(filename.contains("SUCCESS"))
-			{
-				fs.delete(new Path(name));
-			}
-		}*/
+		
 	}
+	
+
 	public static void main(String[] args)
 			throws IOException, ClassNotFoundException, InterruptedException, SQLException, ParseException {
 		System.out.println("main");
-		String str1 = args[0];
-		String str2 = args[1];
-		String str3 = args[2];
-	//	String str1="hdfs://localhost:9000/t";
-	// String str1="hdfs://localhost:9000/input";
-	//String str2="hdfs://localhost:9000/an";
-	//	 String filename=str1.substring(str1.lastIndexOf('/')+1,str1.length());
-		// String str3=str1.substring(0,str1.lastIndexOf('/'))+'/'+filename.substring(0, filename.indexOf('.'))+"-result";
 	
-	//	 String str3="hdfs://localhost:9000/input/tm";
-		 //String str3=str1+"/result";
+//		String str1 = args[0];
+//		String str2 = args[1];
+//		String str3 = args[2];
+//		String str1="hdfs://localhost:9000/t";
+	 String str1="hdfs://localhost:9000/input";
+	String str2="hdfs://localhost:9000/an/metadata.csv";
+		 String str3="hdfs://localhost:9000/input/tm";
 		
 
 		data_import_kmx test = new data_import_kmx(str1, str2, str3);
@@ -266,90 +214,9 @@ public class data_import_kmx {
 		fs.delete(new Path(str3), true);
 
 		test.run();
-		//renameFile("hdfs://localhost:9000/input/testout");
-
-		// fs.copyFromLocalFile(new Path("/home/yjw/Desktop/test"), new
-		// Path("hdfs://localhost:9000/input/Node"));
-		// fs.delete(new Path("hdfs://localhost:9000/input/Node/test"),true);
-
-		// System.out.println(args[0]);
-		// System.out.println(args[1]);
-		// data_import_kmx test=new data_import_kmx(args[0],args[1],args[2]);
-
-		/*
-		 * Configuration conf=new Configuration(); FileSystem
-		 * fs=FileSystem.get(URI.create("/home/yjw"),conf); fs.mkdirs(new
-		 * Path("/home/yjw/Te"));
-		 */
-		/***
-		 * Map => Reduce finished Map Reduce
-		 */
-	
-		// GZip test=new GZip("hdfs://localhost:9000/input/Node/test.tar");
-		// String
-		// t=test.unTargzFile("hdfs://localhost:9000/input/Node/test.tar",
-		// "hdfs://localhost:9000/input");
-		// String str=args[0];
 		
-		/*  GZip test=new
-		  GZip("/home/yjw/Desktop/output1/GW.tar.gz");
-		  
-		  String
-		  t=test.unTargzFile("/home/yjw/Desktop/output1/GW.tar.gz",
-		  "/home/yjw/Desktop/output1"); //String
-		  t="/home/yjw/Desktop/output1/GW";
-		  System.out.println("o:"+t); GoldwindToCSV test2=new GoldwindToCSV();
-		  test2.TraversFolder(t);
-		  
-		  test2.ZipToDB(t); //test2.DbToCSV(t);
-		 
-		  test2.DbToCSV(t);*/
-		/*	String t="/home/yjw/Desktop/input/dsd.csv";
-		  analysisCSV test=new analysisCSV(t);
-		  test.Run();
-		  test.ShowMapDevice();
-		  System.out.println("~~~~~~~~~~~~");
-		  test.ShowMapSensor();
-		  System.out.println("~~~~~~~~~~~~");
-		  test.ShowMapResult();*/
 	}
 
-	public static void traverseFolder1(String path) {
-		int fileNum = 0, folderNum = 0;
-		File file = new File(path);
-		if (file.exists()) {
-			LinkedList<File> list = new LinkedList<File>();
-			File[] files = file.listFiles();
-			for (File file2 : files) {
-				if (file2.isDirectory()) {
-					System.out.println("文件夹1:" + file2.getAbsolutePath());
-					list.add(file2);
-					fileNum++;
-				} else {
-					System.out.println("文件1:" + file2.getAbsolutePath());
-					folderNum++;
-				}
-			}
-			File temp_file;
-			while (!list.isEmpty()) {
-				temp_file = list.removeFirst();
-				files = temp_file.listFiles();
-				for (File file2 : files) {
-					if (file2.isDirectory()) {
-						System.out.println("文件夹2:" + file2.getAbsolutePath());
-						list.add(file2);
-						fileNum++;
-					} else {
-						System.out.println("文件2:" + file2.getAbsolutePath());
-						folderNum++;
-					}
-				}
-			}
-		} else {
-			System.out.println("文件不存在!");
-		}
-		System.out.println("文件夹共有:" + folderNum + ",文件共有:" + fileNum);
-
-	}
+	
 
 }

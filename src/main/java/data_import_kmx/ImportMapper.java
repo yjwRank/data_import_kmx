@@ -1,6 +1,7 @@
 package data_import_kmx;
 
 import java.io.IOException;
+import java.io.FileReader;
 import java.net.URI;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -11,7 +12,10 @@ import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.StringTokenizer;
@@ -50,76 +54,54 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
  * @author yjw
  *
  */
-public class ImportMapper extends Mapper<Object, Text, Text, LList> {
+public class ImportMapper extends Mapper<Object, Text, Text, Text> {
 
-	private final static IntWritable one = new IntWritable(1);
-	private boolean toReduce;
-	private Text word = new Text();
-	private String tmp = "";
-	private LList title = new LList();
-	private int tuibineId_loc = -1;
-	private int WMAN_Tm = -1;
-	private String[] item = null;
-	private Map<String, String> device = new HashMap<String, String>();;
-	private Map<String, List<String>> sensor = new HashMap<String, List<String>>();
+
+	private List<Integer> title =null;
 	private Map<String,List<String> > result=new HashMap<String,List<String>>();
 	private Map<String, Map<String, Integer>> t = new HashMap<String, Map<String, Integer>>();
 	private Queue<String> que = new LinkedList<String>();
 	private Queue<String> tmpkey=new LinkedList<String>();
 	public static final Log LOG = LogFactory.getLog(ImportReduce.class);
-	private String header=null;
 	private FSDataOutputStream outputstream;
 	private boolean writerr;
+	
+	
+	private void readfile(String filename) throws IOException
+	{
+		BufferedReader fis=new BufferedReader(new FileReader(filename));
+		String line=null;
+		while((line=fis.readLine())!=null)
+		{
+			System.out.println("line:"+line);
+		}
+	}
 	protected void setup(Context context) throws IOException, InterruptedException {
 		String fpath = context.getConfiguration().get(FileInputFormat.INPUT_DIR);
-		// String path=fpath.substring(fpath.indexOf(':')+1,
-		// fpath.lastIndexOf('/'));
-		// String path=fpath.substring(0, fpath.lastIndexOf('/'));
 		String path = fpath.substring(fpath.indexOf(',') + 1, fpath.length());
 		String analysisFile = path;
 		writerr=false;
-		Configuration conf=new Configuration();
+		title=new LinkedList();
+		Configuration conf=context.getConfiguration();
 		String output=context.getConfiguration().get(FileOutputFormat.OUTDIR);
 		FileSystem fs=FileSystem.get(URI.create(output+"/err-2"), conf);
 		outputstream=fs.create(new Path(output+"/err-2"));
-		/*
-		 * Configuration conf = new Configuration(); FileSystem fs =
-		 * FileSystem.get(URI.create(path), conf); FileStatus[]
-		 * status=fs.listStatus(new Path(path)); for(FileStatus filet:status) {
-		 * String tmp=filet.getPath().toString(); String
-		 * tt=tmp.substring(tmp.lastIndexOf('.')+1,tmp.length());
-		 * if(tt.equals("csv")) { System.out.println("analys file:"+tmp);
-		 * analysisFile=tmp; }
-		 * 
-		 * }
-		 */
-		// analysisCSV test=new analysisCSV("/home/yjw/Desktop/input/dsd.csv");
-
-		analysisCSV test = new analysisCSV(analysisFile);
-		//test.CSVtoMap();
+		URI[] patternsURIs=Job.getInstance(conf).getCacheFiles();
+		analysisCSV test=null;
+		for(URI patternsURI:patternsURIs)
+		{
+			Path patternPath=new Path(patternsURI.getPath());
+			System.out.println("name:"+patternPath);
+			test=new analysisCSV(patternPath.getName().toString());
+		}
+		System.out.println("log");
 		test.Run();
-		//device = test.getDevice();
-		//sensor = test.getSensor();
+	
 		result=test.getResult();
-		toReduce = false;
+
 		que.clear();
 		System.out.println("theeee");
 		
-		/*for (Map.Entry<String, List<String>> entry : sensor.entrySet()) {
-			// System.out.println("Key= "+entry.getKey()+" Value=
-			// "+entry.getValue());
-			String Key = device.get(entry.getKey());
-
-			int num = 2;// baseIdex
-
-			Map<String, Integer> tmp = new HashMap<String, Integer>();
-			for (int i = 0; i < entry.getValue().size(); i++) {
-
-				tmp.put(entry.getValue().get(i), num + i);
-			}
-			t.put(Key, tmp);
-
-		}*/
 		for(Map.Entry<String, List<String>>entry:result.entrySet())
 		{
 			String Key=entry.getKey();
@@ -136,47 +118,58 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 	protected void cleanup(Context context)
 			throws IOException, InterruptedException {
 		Configuration conf=new Configuration();
-		//outputstream.close();
-		/*String output=context.getConfiguration().get(FileOutputFormat.OUTDIR);
-		FileSystem fs=FileSystem.get(URI.create(output+"/err-2"), conf);
-		FileStatus file=fs.getFileStatus(new Path(output+"/err-2"));
-		if(file.getLen()==0)
-		{
-			fs.delete(new Path(output+"/err-2"));
-		}*/
 		File dictionery=new File("");
 		String loc=dictionery.getAbsolutePath()+"/tmp";
 		FileUtils.deleteDirectory(new File(loc));
 	}
+	public String converToISOTime(String tuibineID) throws ParseException {
+		DateFormat turbineID_format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Date turbineID_date = turbineID_format.parse(tuibineID);
+		TimeZone tz = TimeZone.getTimeZone("UTC");
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+		df.setTimeZone(tz);
+		turbineID_format.setLenient(false);
+		String ISOTime = df.format(turbineID_date);
 
-	public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-		System.out.println("mmm");
-		System.out.println("Key:"+key+" value:"+value);
-		String filename=value.toString();
+		Date now = new Date();
+		if (turbineID_date.after(now))
+			return null;
+
 		try {
-			Connection conn=DriverManager.getConnection("jdbc:sqlite:"+filename);
-			Statement stmt=conn.createStatement();
-			ResultSet rs=stmt.executeQuery("select * from RUNDATA");
-			ResultSetMetaData rsmd=rs.getMetaData();
-			String TuiName=null;
-			TuiName = filename.substring(filename.lastIndexOf('/') + 1, filename.lastIndexOf('.'));
-			TuiName = TuiName.substring(0, TuiName.length() - 8);
-			String buffer="";
-			int colNum=rs.getMetaData().getColumnCount();
-			for(int i=1;i<=colNum;i++)
-			{
-				buffer+=rsmd.getColumnName(i);
-				buffer+=",";
-			}
-			buffer+="turbineID";
-			System.out.println("buffer:"+buffer);
-			buffer=buffer.trim();
-			if(buffer.charAt(0)=='W')
-			{
+			turbineID_format.parse(tuibineID);
+			return ISOTime;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	public void DBwrite(String filename,FileOutputStream out) throws SQLException, ParseException,IOException
+	{
+		Connection conn=DriverManager.getConnection("jdbc:sqlite:"+filename);
+		Statement stmt=conn.createStatement();
+		ResultSet rs=stmt.executeQuery("select * from RUNDATA");
+		ResultSetMetaData rsmd=rs.getMetaData();
+		String TuiName=null;
+		TuiName = filename.substring(filename.lastIndexOf('/') + 1, filename.lastIndexOf('.'));
+		TuiName = TuiName.substring(0, TuiName.length() - 8);
+		String line="";
+		int colNum=rs.getMetaData().getColumnCount();
+		for(int i=1;i<=colNum;i++)
+		{
+			line+=rsmd.getColumnName(i);
+			line+=",";
+		}
+		line+="turbineID";
+		System.out.println("buffer:"+line);
+		line=line.trim();
+		int WMAN_Tm=-1;
+		int tuibineId_loc=-1;
+		String[] item=null;
+		if(line.charAt(0)=='W')
+		{
 			WMAN_Tm=-1;
 			tuibineId_loc=-1;
-			buffer=buffer.replace(".", String.valueOf(""));
-			item=buffer.split(",");
+			line=line.replace(".", String.valueOf(""));
+			item=line.split(",");
 			for(int i=0;i<item.length;i++)
 			{
 				if(item[i].equals("WMANTm"))
@@ -188,26 +181,21 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 					tuibineId_loc=i;
 				}
 			}
-			}
-			else
-			{
-				LOG.error("don't get title in file:"+filename);
-			}
-			
-			String line="";
-			
-			if(rs.next())
-			{
+		}
+		else
+		{
+			LOG.info("don't get title in file:"+filename);
+		}
+		line="";
+		if(rs.next())
+		{
 			for(int i=1;i<=colNum;i++)
 			{
-				line+=rs.getString(i);
-				line+=",";
+				line+=rs.getString(i)+",";
 			}
 			line+=TuiName;
 			title.clear();
-			title.setWMAN_Tm(true);
 			String[] item2=line.split(",");
-			String Key = item2[tuibineId_loc];
 			for(int i=0;i<item.length;i++)
 			{
 				if(i==tuibineId_loc)
@@ -217,174 +205,106 @@ public class ImportMapper extends Mapper<Object, Text, Text, LList> {
 				else if(i==WMAN_Tm)
 				{
 					title.add(1);
-				}else
-				{
-					if(t.get(Key).get(item[i])!=null)
-					{
-					title.add(t.get(Key).get(item[i]));
-					}
+				}
 				else
 				{
-					if(writerr==true)
+					if(t.get(TuiName).get(item[i])!=null)
 					{
-						String message="The file :"+key.toString()+"item "+item[i]+" not find in metadata";
-						outputstream.write(message.getBytes());
-						writerr=false;
+						title.add(t.get(TuiName).get(item[i]));
 					}
-				}
-				}
-			}
-			if(WMAN_Tm==-1)
-			{
-				
-				for(int i=0;i<title.size();i++)
-				{
-					int num=title.get(i);
-					if(num!=0)
-					{
-						title.Settitle(i, num-1);
-					}
-				}
-				title.setWMAN_Tm(false);
-			}
-			title.setName(key.toString());
-			do
-			{
-			title.setLine(line);
-			//context.write(new Text(line), title);
-			context.write(new Text(key.toString()), title);
-			line="";
-			for(int i=1;i<=colNum;i++)
-			{
-				line+=rs.getString(i);
-				line+=",";
-			}
-			line+=TuiName;
-			}while(rs.next());
-			}
-			else
-			{
-				LOG.error("don't find data in file:"+filename);
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	/*	if(line.charAt(0)=='W')
-		{
-			WMAN_Tm = -1;
-			tuibineId_loc = -1;
-			line=line.replace(".", String.valueOf(""));
-			item=line.split(",");
-			//check
-			for (int i = 0; i < item.length; i++) {
-				if (item[i].equals("WMANTm")) {
-					WMAN_Tm = i;
-				} else if (item[i].equals("turbineID")) {
-					tuibineId_loc = i;
-				}
-				writerr=true;
-			}
-		}else
-		{
-			
-			String[] item2 = line.split(",");
-			title.clear();
-			title.setWMAN_Tm(true);
-			String Key = item2[tuibineId_loc];
-			System.out.println("kkk:"+Key);
-			for (int i = 0; i < item.length; i++) {
-				System.out.println("itme:"+item[i]);
-				if (i == tuibineId_loc) {
-					title.add(0);
-				} else if (i == WMAN_Tm) {
-					title.add(1);
-				} else {
-					if(t.get(Key).get(item[i])!=null)
-						{
-						title.add(t.get(Key).get(item[i]));
-						}
 					else
 					{
-						if(writerr==true)
-						{
-							String message="The file :"+key.toString()+"item "+item[i]+" not find in metadata";
-							outputstream.write(message.getBytes());
-							writerr=false;
-						}
+						LOG.info("The file :"+filename+"item "+item[i]+" not find in metadata");
 					}
 				}
 			}
-			if(WMAN_Tm==-1)
-			{
-				
+			do{
+				String buffer="";
+				Vector<String> vec=new Vector<String>();
 				for(int i=0;i<title.size();i++)
 				{
-					int num=title.get(i);
-					if(num!=0)
+					vec.add("0");
+				}
+				for(int i=0;i<title.size();i++)
+				{
+					if(title.get(i)==1)
 					{
-						title.Settitle(i, num-1);
+						String  tmp=converToISOTime(item2[i]);
+						if(tmp==null)
+						{
+							LOG.info("not a date or after Now");
+						}
+						else{
+						vec.setElementAt(converToISOTime(item2[i]), title.get(i));
+						}
+					}
+					else
+					{
+						vec.setElementAt(item2[i], title.get(i));
 					}
 				}
-				title.setWMAN_Tm(false);
-			}
-			title.setName(key.toString());
-			System.out.println("ooooo");
-			context.write(new Text(line), title);*/
+				buffer+=vec.get(0);
+				for(int i=1;i<vec.size();i++)
+				{
+					buffer+=",";
+					buffer+=vec.get(i);
+				}
+				buffer+='\n';
+				out.write(buffer.getBytes());
+				line="";
+				for(int i=1;i<=colNum;i++)
+				{
+					line+=rs.getString(i);
+					line+=",";
+				}
+				line+=TuiName;
+				item2=line.split(",");
+			}while(rs.next());
 		}
-		
-		
-		//System.out.println("tmp:"+tmp+" key:"+key);
-		/*if(!key.toString().equals(tmp))
+	}
+	
+	public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+		System.out.println("Key:"+key+"  value:"+value);
+		File dictionery=new File("");
+		String filename=value.toString();
+		String loc=dictionery.getAbsolutePath()+"/tmp"+filename.substring(filename.lastIndexOf('/'), filename.length())
+		.replace(".tar.gz", String.valueOf(""))+".csv";
+		System.out.println("loc:"+loc);
+		File file=new File(value.toString());
+		FileOutputStream outputfile=new FileOutputStream(loc);
+		if(file.exists())
 		{
-			System.out.println("befor:"+tmp);
-			tmp=key.toString();
-			System.out.println("after:"+tmp);
-			toReduce=false;
-			title.clear();
-		}
-		System.out.println("llllllllllll:"+line);
-		if (line.charAt(0) == 'W') {
-			System.out.println(line);
-			item = line.split(",");
-			for (int i = 0; i < item.length; i++) {
-				if (item[i].equals("WMAN.Tm")) {
-					WMAN_Tm = i;
-				} else if (item[i].equals("turbineID")) {
-					tuibineId_loc = i;
-				}
-			}
-		} else {
-			if (toReduce == false) {
-				String[] item2 = line.split(",");
-
-				System.out.println("tuibi:" + tuibineId_loc);
-				String Key = item2[tuibineId_loc];
-
-				for (int i = 0; i < item.length; i++) {
-					if (i == tuibineId_loc) {
-						title.add(0);
-					} else if (i == WMAN_Tm) {
-						title.add(1);
-					} else {
-						System.out.println("Key:"+Key+"IIIIIIIIIIIIIIIIIIIIIIIIIIiitem:"+item[i]+"  "+t.get(Key).get(item[i]));
-						title.add(t.get(Key).get(item[i]));
+			Queue<File> list=new LinkedList<File>();
+			list.add(file);
+			while(list.size()>0)
+			{
+				File tmp=list.poll();
+				if(tmp.isDirectory())
+				{
+					File[] files=tmp.listFiles();
+					for(File file2:files)
+					{
+						list.add(file2);
 					}
 				}
-
-				toReduce = true;
-				title.setName(key.toString());
-				context.write(new Text(line), title);
-				System.out.println("`~~~~~~~~~~~~~`:"+title.getList());
-				LOG.info("~~~~~~~~~~1:" + line);
-			} else {
-				title.setName(key.toString());
-				context.write(new Text(line), title);
-				LOG.info("~~~~~~~2：" + line);
-				System.out.println("`~~~~~```:"+title.getList());
+				else
+				{
+					try {
+						DBwrite(tmp.getAbsolutePath().toString(),outputfile);
+					} catch (SQLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (ParseException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
 			}
-
+			Configuration conf=new Configuration();
+			FileSystem fs=FileSystem.get(URI.create(key.toString()),conf);
+			fs.copyFromLocalFile(new Path(loc), new Path(key.toString()));
 		}
-		System.out.println("Map end");*/
+	
+	}
 	}
 

@@ -3,6 +3,7 @@ package data_import_kmx;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
@@ -43,8 +44,7 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 
 public class analysisCSV {
-	// private BufferedReader reader;
-	private FSDataInputStream inputStream;
+	private BufferedReader reader;
 	private Map<String, String> device;
 	private Map<String, List<String>> sensor;
 	private Map<String,List<String>> result;
@@ -56,11 +56,7 @@ public class analysisCSV {
 	 * @throws IOException
 	 */
 	public analysisCSV(String fileName) throws IOException {
-		// reader=new BufferedReader(new InputStreamReader(new
-		// FileInputStream(fileName),"UTF-8"));
-		Configuration conf = new Configuration();
-		FileSystem fs = FileSystem.get(URI.create(fileName), conf);
-		//inputStream = fs.open(new Path("/home/yjw/Desktop/input/dsd.csv"));
+		reader=new BufferedReader(new FileReader(fileName));
 		path=fileName;
 		device = new HashMap<String, String>();
 		sensor = new HashMap<String, List<String>>();
@@ -105,7 +101,6 @@ public class analysisCSV {
 			FileStatus tmp=q.poll();
 			if(tmp.isDirectory())
 			{
-				System.out.println("文件夹："+tmp.getPath());
 				FileStatus[] status2=fs.listStatus(new Path(tmp.getPath().toString()));
 				for(FileStatus file2:status2)
 				{
@@ -114,12 +109,9 @@ public class analysisCSV {
 			}
 			else
 			{
-				System.out.println("文件："+tmp.getPath());
-				inputStream = fs.open(new Path(tmp.getPath().toString()));
 				CSVtoMap();
 			}
 		}
-		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 	}
 	/**
 	 * CSV to Map Map
@@ -132,9 +124,8 @@ public class analysisCSV {
 		String line = null;
 		String mark = null;
 		Queue<String> q = new LinkedList<String>();
-		while ((line = inputStream.readLine()) != null) {
+		while ((line = reader.readLine()) != null) {
 			String item[] = line.split(",");
-			//System.out.println("CSV:" + line);
 			if (item[0].contains("<")) {
 				if (item[0].contains("deviceType")) {
 					mark = "deviceType";
@@ -188,11 +179,8 @@ public class analysisCSV {
 			if (sensor.get(item[num_deviceTypeId]) == null) {
 				sensor.put(item[num_deviceTypeId], new LinkedList<String>());
 			}
-			// System.out.println("itemt:"+item[num_deviceTypeId]+"
-			// itemID:"+item[num_id].trim());
 			sensor.get(item[num_deviceTypeId]).add(item[num_id].trim());
 		}
-		// ShowMapSensor();
 	}
 
 	/**
@@ -214,13 +202,9 @@ public class analysisCSV {
 		while (q.size() > 0) {
 			line = q.poll();
 			item = line.split(",");
-			//System.out.println("device:"+item[num_deviceTypeId].trim()+" "+item[num_id].trim());
 			device.put(item[num_deviceTypeId].trim(), item[num_id].trim());
-			//device.put(item[num_id].trim(), item[num_deviceTypeId].trim());
 			result.put(item[num_id].trim(),sensor.get(item[num_deviceTypeId].trim()));
-			//System.out.println("result");
 		}
-		// ShowMapDevice();
 	}
 
 	public void ShowMapSensor() {
