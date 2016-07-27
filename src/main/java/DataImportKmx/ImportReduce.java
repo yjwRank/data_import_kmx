@@ -1,36 +1,20 @@
-package data_import_kmx;
+package DataImportKmx;
 
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.io.File;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.StringTokenizer;
 import java.util.TimeZone;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Iterator;
-import java.util.List;
-
 import java.util.Vector;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
-
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mapreduce.Reducer.Context;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 /**
  * import job Reducer
@@ -43,8 +27,9 @@ public class ImportReduce extends Reducer<Text, LList, NullWritable, Text> {
 	private IntWritable own = new IntWritable();
 	private MultipleOutputs<NullWritable, Text> mos;
 	public static final Log LOG = LogFactory.getLog(ImportReduce.class);
-	private String err=null;
-	private String errType=null;
+	private String err = null;
+	private String errType = null;
+
 	protected void setup(Reducer<Text, LList, NullWritable, Text>.Context context) {
 		mos = new MultipleOutputs<NullWritable, Text>(context);
 	}
@@ -53,7 +38,7 @@ public class ImportReduce extends Reducer<Text, LList, NullWritable, Text> {
 			throws IOException, InterruptedException {
 		mos.close();
 	}
-	
+
 	public String converToISOTime(String tuibineID) throws ParseException {
 		DateFormat turbineID_format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		Date turbineID_date = turbineID_format.parse(tuibineID);
@@ -79,19 +64,19 @@ public class ImportReduce extends Reducer<Text, LList, NullWritable, Text> {
 	public void reduce(Text key, Iterable<LList> title, Context context) throws IOException, InterruptedException {
 		System.out.println("RR");
 		for (LList tit : title) {
-			
+
 			String buffer = "";
-			//String line = key.toString();
-			String line=tit.getLine();
-			//System.out.println("line:"+line);
+			// String line = key.toString();
+			String line = tit.getLine();
+			// System.out.println("line:"+line);
 			String[] token1 = line.split(",");
 			Vector<String> vec = new Vector<String>();
 			if (token1.length != tit.size()) {
 				System.out.println("error " + token1.length + " " + tit.size() + "  name:" + tit.getname());
 			} else {
-			//	System.out.println("right:" + token1.length + " name:" + tit.getname());
-				for (int i = 0; i < token1.length; i++)
-				{
+				// System.out.println("right:" + token1.length + " name:" +
+				// tit.getname());
+				for (int i = 0; i < token1.length; i++) {
 					vec.add("0");
 				}
 				for (int i = 0; i < tit.size(); i++) {
@@ -100,20 +85,19 @@ public class ImportReduce extends Reducer<Text, LList, NullWritable, Text> {
 			}
 
 			if (vec.size() > 0) {
-				
-				if(tit.getWMAN_Tm()==true)
-				{
+
+				if (tit.getWMAN_Tm() == true) {
 					buffer += vec.get(0);
-					int i=1;
+					int i = 1;
 					try {
 						String tmp = converToISOTime(vec.get(i));
-						if (tmp == null)
-						{
-							String name=tit.getname();
-							errType="not a date or after Now";
-							String errmessage=line+"  in file:"+name+" errType:"+errType;
-							mos.write(NullWritable.get(), new Text(errmessage),name.substring(0, name.lastIndexOf('/'))+"/err");
-							return ;
+						if (tmp == null) {
+							String name = tit.getname();
+							errType = "not a date or after Now";
+							String errmessage = line + "  in file:" + name + " errType:" + errType;
+							mos.write(NullWritable.get(), new Text(errmessage),
+									name.substring(0, name.lastIndexOf('/')) + "/err");
+							return;
 						}
 						buffer += ',';
 						buffer += tmp;
@@ -125,26 +109,22 @@ public class ImportReduce extends Reducer<Text, LList, NullWritable, Text> {
 					for (; i < vec.size(); i++) {
 						buffer += ",";
 						buffer += vec.get(i);
-				}
-				
+					}
+
 					mos.write(NullWritable.get(), new Text(buffer), tit.getname());
-				}
-				else
-				{
+				} else {
 					LOG.error("err item");
 				}
-				
-			}
-			else
-			{
+
+			} else {
 				LOG.error("vec size 0");
 			}
-			
+
 			// mos.write(NullWritable.get(), new Text(buffer),
 			// "/home/yjw/Desktop/output/test.csv");
-		//	LOG.info("*********:" + key + "   tit:" + tit.getname());
-			
-			//break;
+			// LOG.info("*********:" + key + " tit:" + tit.getname());
+
+			// break;
 		}
 
 	}

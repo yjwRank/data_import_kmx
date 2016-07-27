@@ -1,33 +1,20 @@
-package data_import_kmx;
+package DataImportKmx;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.MRJobConfig;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
-
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.util.LinkedList;
+import java.util.Queue;
 public class ImportJob {
 
 	private Configuration conf;
@@ -39,7 +26,6 @@ public class ImportJob {
 	public ImportJob(String input, String csv, String output) throws IOException {
 		System.out.println("importjob-importjob");
 		conf = new Configuration();
-		// job=Job.getInstance(conf,"import-data-kmx");
 		inputPath = input;
 		outputPath = output;
 		csvfile = csv;
@@ -54,7 +40,6 @@ public class ImportJob {
 	 * @return return init result
 	 */
 	public boolean init(Configuration conf) {
-
 		return false;
 	}
 
@@ -91,69 +76,53 @@ public class ImportJob {
 	public boolean run() throws IOException, ClassNotFoundException, InterruptedException {
 		System.out.println("importJob-run");
 		job = Job.getInstance(conf, "import data kmx");
-		job.setJarByClass(data_import_kmx.class);
+		job.setJarByClass(DataImportKmx.class);
 		job.addCacheFile(new Path(csvfile).toUri());
 		FileInputFormat.addInputPath(job, new Path(inputPath));
 		FileOutputFormat.setOutputPath(job, new Path(outputPath));
 		FileInputFormat.addInputPath(job, new Path(csvfile));
 		FileInputFormat.setInputDirRecursive(job, true);
-		int exit=job.waitForCompletion(true)?0:1;
-	    renameFile();
-	    System.exit(exit==0?0:1);
+		int exit = job.waitForCompletion(true) ? 0 : 1;
+		renameFile();
+
+		//System.exit(exit == 0 ? 0 : 1);
 		return false;
 	}
-	
-	public void renameFile() throws IOException
-	{
-		Configuration conf=new Configuration();
-		FileSystem fs=FileSystem.get(URI.create(outputPath),conf);
-		FileStatus[] status=fs.listStatus(new Path(outputPath));
-		Queue<FileStatus> q=new LinkedList<FileStatus>();
-		for(FileStatus f:status)
-		{
+
+	public void renameFile() throws IOException {
+		Configuration conf = new Configuration();
+		FileSystem fs = FileSystem.get(URI.create(outputPath), conf);
+		FileStatus[] status = fs.listStatus(new Path(outputPath));
+		Queue<FileStatus> q = new LinkedList<FileStatus>();
+		for (FileStatus f : status) {
 			q.add(f);
 		}
-		while(q.size()>0)
-		{
-			FileStatus file=q.poll();
-			if(file.isDirectory())
-			{
-				FileStatus[] status2=fs.listStatus(new Path(file.getPath().toString()));
-				for(FileStatus f2:status2)
-				{
+		while (q.size() > 0) {
+			FileStatus file = q.poll();
+			if (file.isDirectory()) {
+				FileStatus[] status2 = fs.listStatus(new Path(file.getPath().toString()));
+				for (FileStatus f2 : status2) {
 					q.add(f2);
 				}
-			}
-			else
-			{
-				String name=file.getPath().toString();
-				String filename=name;
-				
-				if(filename.contains("/err-2"))
-				{
-					if(file.getLen()==0)
-					{
+			} else {
+				String name = file.getPath().toString();
+				String filename = name;
+
+				if (filename.contains("/err-2")) {
+					if (file.getLen() == 0) {
 						fs.delete(new Path(name));
 					}
-				}
-				else if(filename.contains("err-r"))
-				{
-					fs.rename(new Path(name), new Path(filename.substring(0,filename.lastIndexOf('/'))+"err"));
-				}
-				else if(filename.contains("part"))
-				{
+				} else if (filename.contains("err-r")) {
+					fs.rename(new Path(name), new Path(filename.substring(0, filename.lastIndexOf('/')) + "err"));
+				} else if (filename.contains("part")) {
 					fs.delete(new Path(name));
-				}
-				else if(filename.contains("-r-"))
-				{
-					fs.rename(new Path(name), new Path(filename.substring(0, filename.indexOf('.'))+".csv"));
-				}
-				else if(filename.contains("SUCCESS"))
-				{
+				} else if (filename.contains("-r-")) {
+					fs.rename(new Path(name), new Path(filename.substring(0, filename.indexOf('.')) + ".csv"));
+				} else if (filename.contains("SUCCESS")) {
 					fs.delete(new Path(name));
 				}
 			}
-			
+
 		}
 	}
 
@@ -168,14 +137,13 @@ public class ImportJob {
 		conf.set(MRJobConfig.MAP_CLASS_ATTR, ImportMapper.class.getName());
 		conf.set(MRJobConfig.INPUT_FORMAT_CLASS_ATTR, ImportInputFormat.class.getName());
 		conf.set(MRJobConfig.MAP_OUTPUT_KEY_CLASS, Text.class.getName());
-		 conf.set(MRJobConfig.MAP_OUTPUT_VALUE_CLASS, Text.class.getName());
+		conf.set(MRJobConfig.MAP_OUTPUT_VALUE_CLASS, Text.class.getName());
 
-		//conf.set(MRJobConfig.MAP_OUTPUT_VALUE_CLASS, LList.class.getName());
+		// conf.set(MRJobConfig.MAP_OUTPUT_VALUE_CLASS, LList.class.getName());
 		conf.set(MRJobConfig.OUTPUT_KEY_CLASS, Text.class.getName());
 		conf.set(MRJobConfig.OUTPUT_VALUE_CLASS, Text.class.getName());
 		conf.set(MRJobConfig.REDUCE_CLASS_ATTR, ImportReduce.class.getName());
-		//conf.set("mapreduce.map.memory.mb","8192");
-		//conf.set("mapred.child.java.opts", "-Xmx2048m");
+		// conf.set("mapred.child.java.opts", "-Xmx2048m");
 	}
 
 }

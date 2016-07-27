@@ -1,4 +1,4 @@
-package data_import_kmx;
+package DataImportKmx;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -17,34 +17,34 @@ public class LList implements Writable {
 	public LList() {
 		title = new LinkedList();
 		name = null;
-		WMAN_Tm=true;
-		line="";
+		WMAN_Tm = true;
+		line = "";
 	}
-	public void setLine(String l)
-	{
-		line=l;
+
+	public void setLine(String l) {
+		line = l;
 	}
-	public String getLine()
-	{
+
+	public String getLine() {
 		return line;
 	}
-	public void setWMAN_Tm(boolean t)
-	{
-		WMAN_Tm=t;
+
+	public void setWMAN_Tm(boolean t) {
+		WMAN_Tm = t;
 	}
-	public boolean getWMAN_Tm()
-	{
+
+	public boolean getWMAN_Tm() {
 		return WMAN_Tm;
 	}
-	public void Settitle(int index,int Num)
-	{
+
+	public void Settitle(int index, int Num) {
 		title.set(index, Num);
 	}
-	
-	public List getList()
-	{
+
+	public List getList() {
 		return title;
 	}
+
 	public void add(int num) {
 		title.add(num);
 	}
@@ -76,8 +76,8 @@ public class LList implements Writable {
 			title.add(in.readInt());
 		}
 		this.name = in.readUTF();
-		this.WMAN_Tm=in.readBoolean();
-		this.line=in.readLine();
+		this.WMAN_Tm = in.readBoolean();
+		this.line = in.readLine();
 	}
 
 	public void write(DataOutput out) throws IOException {

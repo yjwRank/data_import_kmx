@@ -15,7 +15,7 @@
 			<configuration>
 				<archive>
 					<manifest>
-						<mainClass>data_import_kmx.data_import_kmx</mainClass>
+						<mainClass>DataImportKmx.DataImportKmx</mainClass>
 					</manifest>
 				</archive>
 				<descriptorRefs>
@@ -84,8 +84,6 @@
 			<artifactId>hadoop-mapreduce-client-shuffle</artifactId>
 			<version>2.7.2</version>
 		</dependency>
-		   
-		
 		
 	    <dependency>
 	      <groupId>junit</groupId>

@@ -1,4 +1,4 @@
-package data_import_kmx;
+package DataImportKmx;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,7 +26,7 @@ public class Zip {
 
 			ZipEntry z = in.getNextEntry();
 			while (z != null) {
-				//System.out.println("unziping " + z.getName());
+				// System.out.println("unziping " + z.getName());
 
 				File f = new File(outputDirectory);
 				f.mkdir();

@@ -1,11 +1,9 @@
-package data_import_kmx;
+package DataImportKmx;
 
 import java.io.File;
 import java.util.LinkedList;
 import java.util.Queue;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Connection;
@@ -14,13 +12,10 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import org.apache.commons.math3.fitting.PolynomialFitter;
-import org.apache.commons.math3.fitting.WeightedObservedPoint;
 
 public class GoldwindToCSV {
 
-	public void DbToCSV(String path) throws ClassNotFoundException, IOException, SQLException {
-		int fileNum = 0, folderNum = 0;
+	public void dbToCSV(String path) throws ClassNotFoundException, IOException, SQLException {
 		File file = new File(path);
 		Class.forName("org.sqlite.JDBC");
 		Queue<File> list = new LinkedList<File>();
@@ -39,17 +34,17 @@ public class GoldwindToCSV {
 					}
 				} else {
 					System.out.println("文件" + tmp.getAbsolutePath());
-					String filename = tmp.getAbsolutePath();
-					String outputFile = filename.substring(0, filename.lastIndexOf('.')) + ".csv";
+					String fileName = tmp.getAbsolutePath();
+					String outputFile = fileName.substring(0, fileName.lastIndexOf('.')) + ".csv";
 					System.out.println("outputFile:" + outputFile);
 					BufferedWriter bw = new BufferedWriter(new FileWriter(outputFile));
-					Connection conn = DriverManager.getConnection("jdbc:sqlite:" + filename);
+					Connection conn = DriverManager.getConnection("jdbc:sqlite:" + fileName);
 					Statement stmt = conn.createStatement();
 					ResultSet rs = stmt.executeQuery("select * from RUNDATA");
 					ResultSetMetaData rsmd = rs.getMetaData();
-					String TuiName = null;
-					TuiName = filename.substring(filename.lastIndexOf('/') + 1, filename.lastIndexOf('.'));
-					TuiName = TuiName.substring(0, TuiName.length() - 8);
+					String tuiName = null;
+					tuiName = fileName.substring(fileName.lastIndexOf('/') + 1, fileName.lastIndexOf('.'));
+					tuiName = tuiName.substring(0, tuiName.length() - 8);
 					String name = null;
 					int colNum = rs.getMetaData().getColumnCount();
 					for (int i = 1; i <= colNum; i++) {
@@ -62,7 +57,7 @@ public class GoldwindToCSV {
 						for (int i = 1; i <= colNum; i++) {
 							bw.write(rs.getString(i) + ",");
 						}
-						bw.write(TuiName + "\n");
+						bw.write(tuiName + "\n");
 					}
 					conn.close();
 					bw.flush();
@@ -76,7 +71,7 @@ public class GoldwindToCSV {
 		}
 	}
 
-	public void ZipToDB(String path) {
+	public void zipToDB(String path) {
 		int fileNum = 0, folderNum = 0;
 		File file = new File(path);
 		Queue<File> list = new LinkedList<File>();
@@ -99,7 +94,6 @@ public class GoldwindToCSV {
 					String s = tmp.getAbsolutePath();
 					zip.setZipFileName(s);
 					zip.setOutputDirectory(s.substring(0, s.lastIndexOf('/')));
-					//System.out.println("s:" + s + "  name:" + s.substring(0, s.lastIndexOf('/')));
 					zip.unzip();
 					tmp.delete();
 				}
@@ -110,8 +104,7 @@ public class GoldwindToCSV {
 
 	}
 
-	public void TraversFolder(String path) {
-		int fileNum = 0, folderNum = 0;
+	public void traversFolder(String path) {
 		File file = new File(path);
 		Queue<File> list = new LinkedList<File>();
 		if (file.exists()) {
@@ -122,15 +115,14 @@ public class GoldwindToCSV {
 			while (list.size() > 0) {
 				File tmp = list.poll();
 				if (tmp.isDirectory()) {
-					System.out.println("文件夹："+tmp.getAbsolutePath());
-					File[] files2=tmp.listFiles();
-					for(File file3:files2)
-					{
+					System.out.println("文件夹：" + tmp.getAbsolutePath());
+					File[] files2 = tmp.listFiles();
+					for (File file3 : files2) {
 						list.add(file3);
 					}
-				}else{
-					System.out.println("文件："+tmp.getAbsolutePath());
-					GoldWindToZip(tmp);
+				} else {
+					System.out.println("文件：" + tmp.getAbsolutePath());
+					goldWindToZip(tmp);
 				}
 			}
 		} else {
@@ -139,7 +131,7 @@ public class GoldwindToCSV {
 
 	}
 
-	public boolean GoldWindToZip(File file) {
+	public boolean goldWindToZip(File file) {
 
 		String filename = file.getAbsolutePath();
 		if (filename.indexOf(".") >= 0) {
