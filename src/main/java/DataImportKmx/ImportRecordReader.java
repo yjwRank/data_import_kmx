@@ -4,12 +4,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 import java.io.File;
@@ -23,35 +25,86 @@ public class ImportRecordReader extends RecordReader<Text, Text> {
 
 	private Text key;
 	private Text value;
-	private String file;
-	private List<File> filelist;
 	private Queue<String> keyvalue;
-	private String outpath;
 	public static final Log LOG = LogFactory.getLog(ImportRecordReader.class);
 
 	@Override
 	public void initialize(InputSplit split, TaskAttemptContext context) throws IOException, InterruptedException {
 		// TODO Auto-generated method stub
-		System.out.println(context.getConfiguration().get(FileInputFormat.INPUT_DIR));
-		file = split.toString().substring(0, split.toString().lastIndexOf(':')).trim();
+		String file = ((FileSplit) split).getPath().toString();
+		LOG.info("recordReader init file:"+file);
 		System.out.println("file:" + file);
-		outpath = context.getConfiguration().get(FileOutputFormat.OUTDIR);
-		String file1 = file;
+		String outpath = context.getConfiguration().get(FileOutputFormat.OUTDIR);
+		//String file1 = file;
 		Configuration conf = new Configuration();
 		File directory = new File("");
-		FileSystem fs = FileSystem.get(URI.create(file1.toString()), conf);
+		FileSystem fs = FileSystem.get(URI.create(file.toString()), conf);
 		String loc = directory.getAbsolutePath() + "/tmp";
 		File dir = new File(loc);
 		dir.mkdir();
-		String fpath = file1.toString().trim();
+		String fpath = file.toString().trim();
 		String filename = fpath.substring(fpath.lastIndexOf('/'), fpath.length());
 		String locFile = loc + filename;
-		fs.copyToLocalFile(new Path(file1), new Path(locFile));
+		fs.copyToLocalFile(new Path(file), new Path(locFile));
 		keyvalue = new LinkedList<String>();
 		String path = locFile.substring(0, locFile.lastIndexOf('/'));
 		GZip turn = new GZip(locFile);
 		String tfile = turn.unTargzFile(locFile, path);
-		LOG.info("ImportRecordReader:" + locFile + "  path:" + path);
+		/*File tarFileFolder=new File(locFile);
+		String name=filename.substring(0, filename.length());
+		name=name.substring(0, name.indexOf("."));
+		File unTarFolder=new File(path);
+		File outputFolder=new File(path+name);
+		System.out.println(tarFileFolder.getAbsolutePath()+" "+outputFolder.getAbsolutePath());
+		FileUtil.unTar(tarFileFolder, unTarFolder);
+		Queue<File> q=new LinkedList<File>();
+		q.add(outputFolder);
+		while(q.size()>0)
+		{
+			File tmp=q.poll();
+			if(tmp.isDirectory())
+			{
+				File[] files=tmp.listFiles();
+				for(File file:files)
+				{
+					q.add(file);
+				}
+			}
+			else
+			{
+				LOG.info("unZip before  tmp:"+tmp.getAbsolutePath()+"  outputfolder:"+outputFolder.getAbsolutePath());
+				FileUtil.unZip(tmp, outputFolder);
+				LOG.info("unZip after  tmp:"+tmp.getAbsolutePath()+"  outputfolder:"+outputFolder.getAbsolutePath());
+				
+				tmp.delete();
+				LOG.info("deleteed");
+			}
+		}
+		q.clear();
+		q.add(outputFolder);
+		while(q.size()>0)
+		{
+			File tmp=q.poll();
+			System.out.println("file:"+tmp.getAbsolutePath());
+			if(tmp.isDirectory())
+			{
+				File[] files=tmp.listFiles();
+				for(File file:files)
+				{
+					q.add(file);
+				}
+			}
+			else
+			{
+				String tpath=tmp.getAbsolutePath();
+				tpath=tpath.substring(0,tpath.lastIndexOf("/"));
+				String tfilename=tmp.getAbsolutePath();
+				tfilename=tfilename.substring(tfilename.lastIndexOf('\\')+1,tfilename.length());
+				tmp.renameTo(new File(tpath+"/"+tfilename));
+				System.out.println("h");
+			}
+		}*/
+		LOG.info("ImportRecordReader:" + locFile + "  path:" + path+" targetfolder:"+tfile);
 		keyvalue.add(outpath + "$" + tfile);
 	}
 

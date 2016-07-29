@@ -77,7 +77,25 @@ public class ImportJob {
 		System.out.println("importJob-run");
 		job = Job.getInstance(conf, "import data kmx");
 		job.setJarByClass(DataImportKmx.class);
-		job.addCacheFile(new Path(csvfile).toUri());
+		FileSystem fs=FileSystem.get(URI.create(csvfile),conf);
+		Queue<FileStatus> list=new LinkedList<FileStatus>();
+		FileStatus file=fs.getFileStatus(new Path(csvfile));
+		list.add(file);
+		while(list.size()>0)
+		{
+			FileStatus tmp=list.poll();
+			if(tmp.isDirectory())
+			{
+				FileStatus[] status=fs.listStatus(new Path(tmp.getPath().toString()));
+				for(FileStatus file2:status)
+					list.add(file2);
+			}
+			else
+			{
+				job.addCacheFile(new Path(tmp.getPath().toString()).toUri());
+			}
+		}
+		//job.addCacheFile(new Path(csvfile).toUri());
 		FileInputFormat.addInputPath(job, new Path(inputPath));
 		FileOutputFormat.setOutputPath(job, new Path(outputPath));
 		FileInputFormat.addInputPath(job, new Path(csvfile));

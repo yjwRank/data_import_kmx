@@ -33,8 +33,9 @@ public class ImportInputFormat extends FileInputFormat<Text, Text> {
 			file = files.get(i);
 			Path path = file.getPath();
 			long length = file.getLen();
-			if (length != 0 && path.toString().contains(".tar.gz")
-					&& (length / 1024 / 1024) < (MRJobConfig.DEFAULT_MAP_MEMORY_MB / 7)) {
+			if (length != 0 && path.toString().contains(".tar.gz"))
+			{
+				if((length / 1024 / 1024) < (MRJobConfig.DEFAULT_MAP_MEMORY_MB / 7)) {
 				BlockLocation[] blkLocations;
 				if (file instanceof LocatedFileStatus) {
 					blkLocations = ((LocatedFileStatus) file).getBlockLocations();
@@ -45,6 +46,7 @@ public class ImportInputFormat extends FileInputFormat<Text, Text> {
 				splits.add(makeSplit(path, 0, length, blkLocations[0].getHosts(), blkLocations[0].getCachedHosts()));
 			} else {
 				LOG.info("file too big");
+			}
 			}
 		}
 

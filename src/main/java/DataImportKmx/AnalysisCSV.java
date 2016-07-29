@@ -4,8 +4,11 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.mortbay.log.Log;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URI;
@@ -22,6 +25,14 @@ public class AnalysisCSV {
 	private Map<String, List<String>> result;
 	private String path;
 
+	
+	public AnalysisCSV()
+	{
+		path=null;
+		device = new HashMap<String, String>();
+		sensor = new HashMap<String, List<String>>();
+		result = new HashMap<String, List<String>>();
+	}
 	/**
 	 * constructor
 	 * 
@@ -29,6 +40,7 @@ public class AnalysisCSV {
 	 * @throws IOException
 	 */
 	public AnalysisCSV(String fileName) throws IOException {
+		Log.info("analysis constructor filename:"+fileName);
 		reader = new BufferedReader(new FileReader(fileName));
 		path = fileName;
 		device = new HashMap<String, String>();
@@ -61,26 +73,26 @@ public class AnalysisCSV {
 	public Map<String, List<String>> getSensor() {
 		return sensor;
 	}
-
+	public void add(String fileName) throws IOException
+	{
+		reader = new BufferedReader(new FileReader(fileName));
+		path = fileName;
+		run();
+	}
 	/**
 	 * read input from inputPath and fine all file
 	 * @throws IOException
 	 */
 	public void run() throws IOException {
-		Configuration conf = new Configuration();
-		FileSystem fs = FileSystem.get(URI.create(path), conf);
-		// FileStatus[] status=fs.listStatus(new Path(path));
-		FileStatus file = fs.getFileStatus(new Path(path));
-		Queue<FileStatus> q = new LinkedList<FileStatus>();
-		// for(FileStatus file:status)
-		// {
+	
+		File file=new File(path);
+		Queue<File> q = new LinkedList<File>();
 		q.add(file);
-		// }
 		while (q.size() > 0) {
-			FileStatus tmp = q.poll();
+			File tmp = q.poll();
 			if (tmp.isDirectory()) {
-				FileStatus[] status2 = fs.listStatus(new Path(tmp.getPath().toString()));
-				for (FileStatus file2 : status2) {
+				File[] status2 = tmp.listFiles();
+				for (File file2 : status2) {
 					q.add(file2);
 				}
 			} else {
