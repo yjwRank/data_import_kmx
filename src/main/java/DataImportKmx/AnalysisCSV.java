@@ -119,18 +119,18 @@ public class AnalysisCSV {
 					mark = "deviceType";
 				} else if (item[0].contains("sensor")) {
 					mark = "sensor";
-					deviceType(q);
+					getDeviceType(q);
 					q.clear();
 				} else if (item[0].contains("device")) {
 					mark = "device";
-					sensor(q);
+					getSensor(q);
 					q.clear();
 				}
 			} else {
 				q.add(line);
 			}
 		}
-		device(q);
+		getDevice(q);
 		return true;
 	}
 
@@ -139,7 +139,7 @@ public class AnalysisCSV {
 	 * 
 	 * @param q
 	 */
-	public void deviceType(Queue<String> q) {
+	public void getDeviceType(Queue<String> q) {
 
 	}
 
@@ -148,7 +148,7 @@ public class AnalysisCSV {
 	 * 
 	 * @param q
 	 */
-	public void sensor(Queue<String> q) {
+	public void getSensor(Queue<String> q) {
 		Map<String, Integer> sensorMap = new HashMap<String, Integer>();
 		String line = null;
 		line = q.poll();
@@ -175,7 +175,7 @@ public class AnalysisCSV {
 	 * 
 	 * @param q
 	 */
-	public void device(Queue<String> q) {
+	public void getDevice(Queue<String> q) {
 		Map<String, Integer> deviceMap = new HashMap<String, Integer>();
 		String line = null;
 		line = q.poll();
