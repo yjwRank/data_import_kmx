@@ -1,5 +1,12 @@
 package DataImportKmx;
 
+import java.io.IOException;
+import java.net.URI;
+import java.util.LinkedList;
+import java.util.Queue;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -10,61 +17,28 @@ import org.apache.hadoop.mapreduce.MRJobConfig;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.util.LinkedList;
-import java.util.Queue;
 public class ImportJob {
-
+	public static final Log LOG = LogFactory.getLog(ImportJob.class);
 	private Configuration conf;
 	private Job job;
 	private String inputPath = null;
 	private String outputPath = null;
-	private String csvfile = null;
+	private String csvAndPropertiesPath = null;
 
-	public ImportJob(String input, String csv, String output) throws IOException {
+	public ImportJob(String input, String csvAndProperties, String output) throws IOException {
 		System.out.println("importjob-importjob");
+		LOG.info("ImportJob constructor  input:" + input + " analysisfile:" + csvAndProperties + " outputPath:"
+				+ output);
 		conf = new Configuration();
+		// conf.addResource(new URL("http://192.168.130.120:8088/conf"));
 		inputPath = input;
 		outputPath = output;
-		csvfile = csv;
+		csvAndPropertiesPath = csvAndProperties;
 		setMRJobConf();
 	}
 
 	/**
-	 * init ImportJob
-	 * 
-	 * @param conf
-	 *            configuration
-	 * @return return init result
-	 */
-	public boolean init(Configuration conf) {
-		return false;
-	}
-
-	/**
-	 * delete Outputdir
-	 * 
-	 * @param dir
-	 * @return
-	 */
-	public boolean deleteDir(File dir) {
-		System.out.println("ImportJob-deleteDir");
-		if (dir.isDirectory()) {
-			String[] children = dir.list();
-			for (int i = 0; i < children.length; i++) {
-				boolean success = deleteDir(new File(dir, children[i]));
-				if (!success) {
-					return false;
-				}
-			}
-		}
-		return dir.delete();
-	}
-
-	/**
-	 * run a ImportJob
+	 * run a ImportJob add inputpath、set outputpath、set distributed Cache file
 	 * 
 	 * @param conf
 	 *            configuration
@@ -74,40 +48,41 @@ public class ImportJob {
 	 * @throws ClassNotFoundException
 	 */
 	public boolean run() throws IOException, ClassNotFoundException, InterruptedException {
-		System.out.println("importJob-run");
+		System.out.println("impo3rtJob-run");
+		LOG.info("ImportJob-run");
 		job = Job.getInstance(conf, "import data kmx");
 		job.setJarByClass(DataImportKmx.class);
-		FileSystem fs=FileSystem.get(URI.create(csvfile),conf);
-		Queue<FileStatus> list=new LinkedList<FileStatus>();
-		FileStatus file=fs.getFileStatus(new Path(csvfile));
+		FileSystem fs = FileSystem.get(URI.create(csvAndPropertiesPath), conf);
+		Queue<FileStatus> list = new LinkedList<FileStatus>();
+		FileStatus file = fs.getFileStatus(new Path(csvAndPropertiesPath));
 		list.add(file);
-		while(list.size()>0)
-		{
-			FileStatus tmp=list.poll();
-			if(tmp.isDirectory())
-			{
-				FileStatus[] status=fs.listStatus(new Path(tmp.getPath().toString()));
-				for(FileStatus file2:status)
+		while (list.size() > 0) {
+			FileStatus tmp = list.poll();
+			if (tmp.isDirectory()) {
+				FileStatus[] status = fs.listStatus(new Path(tmp.getPath().toString()));
+				for (FileStatus file2 : status)
 					list.add(file2);
-			}
-			else
-			{
+			} else {
 				job.addCacheFile(new Path(tmp.getPath().toString()).toUri());
+				LOG.info("ImportJob-run cacheFile:" + tmp.getPath().toString());
 			}
 		}
-		//job.addCacheFile(new Path(csvfile).toUri());
 		FileInputFormat.addInputPath(job, new Path(inputPath));
 		FileOutputFormat.setOutputPath(job, new Path(outputPath));
-		FileInputFormat.addInputPath(job, new Path(csvfile));
+		LOG.info("ImportJob-run  InputPath:" + inputPath + " OutputPath:" + outputPath);
 		FileInputFormat.setInputDirRecursive(job, true);
-		int exit = job.waitForCompletion(true) ? 0 : 1;
+		job.waitForCompletion(true);
 		renameFile();
-
-		//System.exit(exit == 0 ? 0 : 1);
 		return false;
 	}
 
+	/**
+	 * rename the result file rm **-r-**
+	 * 
+	 * @throws IOException
+	 */
 	public void renameFile() throws IOException {
+		LOG.info("ImportJob-rename");
 		Configuration conf = new Configuration();
 		FileSystem fs = FileSystem.get(URI.create(outputPath), conf);
 		FileStatus[] status = fs.listStatus(new Path(outputPath));
@@ -126,13 +101,7 @@ public class ImportJob {
 				String name = file.getPath().toString();
 				String filename = name;
 
-				if (filename.contains("/err-2")) {
-					if (file.getLen() == 0) {
-						fs.delete(new Path(name));
-					}
-				} else if (filename.contains("err-r")) {
-					fs.rename(new Path(name), new Path(filename.substring(0, filename.lastIndexOf('/')) + "err"));
-				} else if (filename.contains("part")) {
+				if (filename.contains("part")) {
 					fs.delete(new Path(name));
 				} else if (filename.contains("-r-")) {
 					fs.rename(new Path(name), new Path(filename.substring(0, filename.indexOf('.')) + ".csv"));
@@ -146,22 +115,17 @@ public class ImportJob {
 
 	/**
 	 * set MR Job configuration Jobname、map class、map output key、map output
-	 * value、combine class、reduce class
+	 * value
 	 * 
 	 */
 
 	private void setMRJobConf() {
+		LOG.info("ImportJob-setMRJobConf");
 		conf.set(MRJobConfig.JOB_NAME, "ImportDataToKMX");
 		conf.set(MRJobConfig.MAP_CLASS_ATTR, ImportMapper.class.getName());
 		conf.set(MRJobConfig.INPUT_FORMAT_CLASS_ATTR, ImportInputFormat.class.getName());
 		conf.set(MRJobConfig.MAP_OUTPUT_KEY_CLASS, Text.class.getName());
 		conf.set(MRJobConfig.MAP_OUTPUT_VALUE_CLASS, Text.class.getName());
-
-		// conf.set(MRJobConfig.MAP_OUTPUT_VALUE_CLASS, LList.class.getName());
-		conf.set(MRJobConfig.OUTPUT_KEY_CLASS, Text.class.getName());
-		conf.set(MRJobConfig.OUTPUT_VALUE_CLASS, Text.class.getName());
-		conf.set(MRJobConfig.REDUCE_CLASS_ATTR, ImportReduce.class.getName());
-		// conf.set("mapred.child.java.opts", "-Xmx2048m");
 	}
 
 }

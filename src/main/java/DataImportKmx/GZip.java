@@ -1,13 +1,5 @@
 package DataImportKmx;
 
-import org.apache.commons.compress.archivers.ArchiveException;
-import org.apache.commons.compress.archivers.ArchiveInputStream;
-import org.apache.commons.compress.archivers.ArchiveStreamFactory;
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -15,35 +7,46 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URI;
 import java.util.zip.Adler32;
 import java.util.zip.CheckedInputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.commons.compress.archivers.ArchiveException;
+import org.apache.commons.compress.archivers.ArchiveInputStream;
+import org.apache.commons.compress.archivers.ArchiveStreamFactory;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class GZip {
 
+	public static final Log LOG = LogFactory.getLog(GZip.class);
 	private BufferedOutputStream bufferedOutputStream;
-
 	private String zipFileName = null;
 
 	/**
 	 * constructor
-	 * @param fileName : tar file
+	 * 
+	 * @param fileName
+	 *            : tar file
 	 */
 	public GZip(String fileName) {
 		this.zipFileName = fileName;
 	}
-	
+
 	/**
 	 * transform zip file to db file
-	 * @param fileName : tar file
-	 * @param dir : output dir
+	 * 
+	 * @param fileName
+	 *            : tar file
+	 * @param dir
+	 *            : output dir
 	 */
 	public void zipToDB(String fileName, String dir) {
 		try {
+			LOG.info("GZip-zipToDB fileName:" + fileName + " directory:" + dir);
 			final int BUFFER = 2048;
 			BufferedOutputStream dest = null;
 			FileInputStream fis = new FileInputStream(fileName);
@@ -73,15 +76,17 @@ public class GZip {
 
 	/**
 	 * UnTar.gz file
-	 * @param rarFileName : input file
-	 * @param destDir : dest directory
+	 * 
+	 * @param rarFileName
+	 *            : input file
+	 * @param destDir
+	 *            : dest directory
 	 * @return
 	 * @throws IOException
 	 */
 	public String unTargzFile(String rarFileName, String destDir) throws IOException {
-		Configuration conf = new Configuration();
-		FileSystem fs = FileSystem.get(URI.create(zipFileName), conf);
-		Path inputPath = new Path(zipFileName);
+		LOG.info("GZip-unTargzFile zipFileName:" + zipFileName + " rarFileName:" + rarFileName + " dest Directroy:"
+				+ destDir);
 		GZip gzip = new GZip(rarFileName);
 
 		String outputDirectory = destDir;
@@ -93,7 +98,16 @@ public class GZip {
 		return gzip.unzipOarFile(outputDirectory);
 	}
 
+	/**
+	 * uncompress tar file
+	 * 
+	 * @param outputDirectory
+	 *            dest output directory
+	 * @return return the outputDirectory+foldername
+	 * @throws FileNotFoundException
+	 */
 	public String unzipOarFile(String outputDirectory) throws FileNotFoundException {
+		LOG.info("GZip-unzipOarFile output Directory:" + outputDirectory);
 		FileInputStream fis = null;
 		ArchiveInputStream in = null;
 		String outputPath = null;
@@ -132,7 +146,7 @@ public class GZip {
 
 		} catch (IOException | ArchiveException e) {
 			e.printStackTrace();
-		}  finally {
+		} finally {
 			try {
 				if (bufferedInputStream != null) {
 					bufferedInputStream.close();

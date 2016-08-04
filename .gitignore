@@ -2,3 +2,4 @@
 *.tar.gz
 *.csv
 /tmp
+/sensorNameKv.properties

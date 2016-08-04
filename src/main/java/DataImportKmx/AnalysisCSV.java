@@ -1,22 +1,17 @@
 package DataImportKmx;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.mortbay.log.Log;
-
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.LinkedList;
+
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
 
 public class AnalysisCSV {
 	private BufferedReader reader;
@@ -24,23 +19,24 @@ public class AnalysisCSV {
 	private Map<String, List<String>> sensor;
 	private Map<String, List<String>> result;
 	private String path;
+	public static final Log LOG = LogFactory.getLog(AnalysisCSV.class);
 
-	
-	public AnalysisCSV()
-	{
-		path=null;
+	public AnalysisCSV() {
+		path = null;
 		device = new HashMap<String, String>();
 		sensor = new HashMap<String, List<String>>();
 		result = new HashMap<String, List<String>>();
 	}
+
 	/**
 	 * constructor
 	 * 
-	 * @param fileName can be a path contain metadata file or a metadata file
+	 * @param fileName
+	 *            can be a path contain metadata file or a metadata file
 	 * @throws IOException
 	 */
 	public AnalysisCSV(String fileName) throws IOException {
-		Log.info("analysis constructor filename:"+fileName);
+		LOG.info("analysis constructor filename:" + fileName);
 		reader = new BufferedReader(new FileReader(fileName));
 		path = fileName;
 		device = new HashMap<String, String>();
@@ -73,19 +69,22 @@ public class AnalysisCSV {
 	public Map<String, List<String>> getSensor() {
 		return sensor;
 	}
-	public void add(String fileName) throws IOException
-	{
+
+	public void add(String fileName) throws IOException {
+		LOG.info("AnalysisCSV-add fileName:" + fileName);
 		reader = new BufferedReader(new FileReader(fileName));
 		path = fileName;
 		run();
 	}
+
 	/**
 	 * read input from inputPath and fine all file
+	 * 
 	 * @throws IOException
 	 */
 	public void run() throws IOException {
-	
-		File file=new File(path);
+		LOG.info("AnalysisCSV-run");
+		File file = new File(path);
 		Queue<File> q = new LinkedList<File>();
 		q.add(file);
 		while (q.size() > 0) {
@@ -96,33 +95,33 @@ public class AnalysisCSV {
 					q.add(file2);
 				}
 			} else {
-				csvToMap();
+				turnCsvToMap();
 			}
 		}
 	}
 
 	/**
 	 * 
-	 * read the metadata file and get "deviceType" block、"sensor" block、"device" block 
+	 * read the metadata file and get "deviceType" block、"sensor" block、"device"
+	 * block
+	 * 
 	 * @return
 	 * @throws IOException
 	 */
 
-	public boolean csvToMap() throws IOException {
+	public boolean turnCsvToMap() throws IOException {
 		String line = null;
-		String mark = null;
+		LOG.info("Analysis-turnCsvToMap");
 		Queue<String> q = new LinkedList<String>();
 		while ((line = reader.readLine()) != null) {
 			String item[] = line.split(",");
 			if (item[0].contains("<")) {
 				if (item[0].contains("deviceType")) {
-					mark = "deviceType";
+					;
 				} else if (item[0].contains("sensor")) {
-					mark = "sensor";
 					getDeviceType(q);
 					q.clear();
 				} else if (item[0].contains("device")) {
-					mark = "device";
 					getSensor(q);
 					q.clear();
 				}
@@ -149,6 +148,7 @@ public class AnalysisCSV {
 	 * @param q
 	 */
 	public void getSensor(Queue<String> q) {
+		LOG.info("AnalysisCSV-getSensor");
 		Map<String, Integer> sensorMap = new HashMap<String, Integer>();
 		String line = null;
 		line = q.poll();
@@ -176,6 +176,7 @@ public class AnalysisCSV {
 	 * @param q
 	 */
 	public void getDevice(Queue<String> q) {
+		LOG.info("AnalysisCSV-getDevice");
 		Map<String, Integer> deviceMap = new HashMap<String, Integer>();
 		String line = null;
 		line = q.poll();
