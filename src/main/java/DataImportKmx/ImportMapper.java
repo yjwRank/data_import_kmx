@@ -90,6 +90,9 @@ public class ImportMapper extends Mapper<Object, Text, Text, Text> {
 		Connection conn = DriverManager.getConnection("jdbc:sqlite:" + filename);
 		Statement stmt = conn.createStatement();
 		StringBuffer sql = new StringBuffer();
+		String time=filename.substring(filename.lastIndexOf('/')+1,filename.lastIndexOf('.'));
+		time=time.substring(time.length()-8,time.length());
+		time=time.substring(0, 4)+"-"+time.substring(4,6)+"-"+time.substring(6,8);
 		String key = filename.substring(filename.lastIndexOf('/') + 1, filename.length() - 11);
 		sql.append("select ");
 		sql.append("strftime('%Y-%m-%dT%H:%M:%SZ',\"WMAN.Tm\") as WMANTm" + ",");
@@ -98,6 +101,8 @@ public class ImportMapper extends Mapper<Object, Text, Text, Text> {
 			sql.append("," + "\"" + props.getProperty(result.get(key).get(i)) + "\"");
 		}
 		sql.append(" from RUNDATA");
+		sql.append(" where \"WMAN.Tm\">='"+time+" 00:00:00' and \"WMAN.Tm\"<='"+time+" 23:59:59'");
+		System.out.println("sql:"+sql.toString());
 		ResultSet rs = stmt.executeQuery(sql.toString());
 		int colNum = rs.getMetaData().getColumnCount();
 		StringBuffer buffer = new StringBuffer();

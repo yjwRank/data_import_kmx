@@ -45,11 +45,9 @@ public class DataImportKmx {
 		Configuration conf = new Configuration();
 		FileSystem fs = FileSystem.get(URI.create(str3), conf);
 		fs.delete(new Path(str3), true);
-
 		test.run();
 		long end = System.currentTimeMillis();
 		System.out.println("total time:" + (end - start));
-
 	}
 
 }
